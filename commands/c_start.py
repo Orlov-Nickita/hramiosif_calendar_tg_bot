@@ -1,7 +1,9 @@
+import time
+
 import telebot
 import emoji
 
-from hdd.sql.sql_adding_new_user import data_add
+from utils.sql_funcs import data_add
 from loader import bot, users_sql_dir, users_sql_file_name
 from utils.logger import logger
 from keyboards_for_bot.keyboards import RKM_for_the_menu
@@ -10,8 +12,8 @@ from keyboards_for_bot.keyboards import RKM_for_the_menu
 def start(message: telebot.types.Message) -> None:
     """
     Функция инициализации бота.
-    :param message: Принимается сообщение от пользователя.
-    :return: Возвращается приветственное сообщение и открывается меню бота с клавиатурой.
+    :param message: Сообщение от пользователя.
+    :return: Запускается бот, добавляется запись в БД.
     """
     logger.info('Запущена функция c_start.start',
                 username=message.from_user.username,

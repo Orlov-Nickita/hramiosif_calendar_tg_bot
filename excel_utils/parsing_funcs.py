@@ -43,7 +43,12 @@ def all_days_in_schedule_file(jsonfile: str) -> dict:
 def find_information_in_file(day: str,
                              saint: bool = False, timing: bool = False) -> str:
     """
-    Функция объединяет в строку несколько ячеек, чтобы одномоментно отправить сообщение в чат.
+    Функция находит нужные ячейки и
+    объединяет в строку несколько ячеек, чтобы одномоментно отправить сообщение в чат.
+    param day: День для которого поиск
+    param saint: Переключатель для поиска по столбцу святых
+    param timing: Переключатель для поиска по столбцу расписаний
+    return: Возвращает готовый к отправке текст сообщение со святыми или расписанием
     """
     day_index = data_from_json(schedules_excel_dir + json_days_with_index)[day]
     cell_rows = data_from_json(schedules_excel_dir + json_days_with_lines)[day]
@@ -72,7 +77,7 @@ def schedule_for_a_specific_day(day: str, username: str, user_id: int) -> str:
     :param day: День, для которого поиск.
     :param username: Никнейм для логирования.
     :param user_id: Id для логирования.
-    :return: Сообщение со всей информацией на выбранных день.
+    :return: Сообщение со всей информацией на выбранный день.
     """
     logger.info('Запущена функция schedule_for_a_specific_day',
                 username=username,
@@ -104,7 +109,7 @@ def schedule_for_some_days(days: list, username: str, user_id: int) -> str:
     :param days: Дни, для которого поиск.
     :param username: Никнейм для логирования.
     :param user_id: Id для логирования.
-    :return: Сообщение со всей информацией на выбранных день.
+    :return: Сообщение со всей информацией на остаток текущей недели.
     """
     logger.info('Запущена функция schedule_for_a_specific_day',
                 username=username,

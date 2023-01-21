@@ -2,6 +2,8 @@ import telebot
 import os.path
 import datetime
 from telegram import ParseMode
+
+from errors import FileError
 from keyboards_for_bot.admin_keyboards import IKM_admin_save_photo_again, \
     IKM_admin_month_save_photo, IKM_admin_panel_main, IKM_admin_overwrite_file_first_choice, \
     IKM_admin_overwrite_file_second_choice
@@ -17,9 +19,9 @@ check_file_info = False
 
 def start_month(message: telebot.types.Message) -> None:
     """
-    Функция загрузки фотографий.
-    :param message: Принимается сообщение от пользователя.
-    :return: Возвращается приветственное сообщение и открывается меню бота с клавиатурой.
+    Стартовая функция начала процесса загрузки фотографий.
+    :param message: Сообщение от пользователя.
+    :return: Сообщение от бота и ожидание фотографии.
     """
     logger.info('Запущена функция admin_photo_month_load.start_month',
                 username=message.chat.username,
@@ -34,8 +36,11 @@ def start_month(message: telebot.types.Message) -> None:
     bot.register_next_step_handler(message=msg, callback=photo_month)
 
 
-# @bot.message_handler(content_types=["photo", 'document'])
 def photo_month(message: telebot.types.Message) -> None:
+    """
+    Функция обработчик присланного файла
+    :param message: Сообщение от пользователя.
+    """
     logger.info('Запущена функция photo_month пользователь отправил в бот файл',
                 username=message.chat.username,
                 user_id=message.chat.id)
@@ -46,24 +51,32 @@ def photo_month(message: telebot.types.Message) -> None:
             os.makedirs(schedule_photo_month_dir)
         
         if message.photo:
-            # print('Это фото')
+            logger.info('Пользователь прислал фото',
+                        username=message.chat.username,
+                        user_id=message.chat.id)
+            
             file_info = bot.get_file(message.photo[-1].file_id)
         
         elif message.document and 'image' in message.document.mime_type:
-            # print('Это документ')
-            logger.info('Тип файла {}'.format(message.document.mime_type),
+            
+            logger.info('Пользователь прислал файл. Тип файла {}'.format(message.document.mime_type),
                         username=message.chat.username,
                         user_id=message.chat.id)
             
             file_info = bot.get_file(message.document.file_id)
         
+        else:
+            raise FileError
+        
         global check_file_info
         check_file_info = True
     
-    except Exception as ex:
-        logger.error('Произошла ошибка {}'.format(ex),
+    except FileError:
+        logger.error('Ошибка формата файла FileError {}'.format(message),
                      username=message.from_user.username,
                      user_id=message.chat.id)
+        bot.send_message(chat_id=message.chat.id,
+                         text='Ошибка. Нужно фото. Повторите отправку')
     
     else:
         msg = bot.send_message(text='На какой месяц это расписание?',
@@ -79,6 +92,9 @@ def photo_month(message: telebot.types.Message) -> None:
                       and check_file_info
                       and 'На какой месяц это расписание' in call.message.text)
 def save_photo_month(call: telebot.types.CallbackQuery) -> None:
+    """
+    Функция обработчик первой клавиатуры с определением номера месяца
+    """
     logger.info(
         'Запущена функция save_photo_month, пользователь нажал на кнопку "{}"'.format(button_text(call)),
         username=call.message.from_user.username,
@@ -144,6 +160,9 @@ def save_photo_month(call: telebot.types.CallbackQuery) -> None:
 
 
 def download_photo_month(message: telebot.types.Message) -> None:
+    """
+    Функция загрузки фотографии. Бот проверяет наличие и сохраняет или предлагает перезаписать
+    """
     logger.info(
         'Запущена функция download_photo_month',
         username=message.from_user.username,
@@ -197,6 +216,9 @@ def download_photo_month(message: telebot.types.Message) -> None:
     func=lambda call: call.data == 'open_menu_again'
                       and 'Панель управления' in call.message.text)
 def open_menu_month(call: telebot.types.CallbackQuery) -> None:
+    """
+    Функция обработчик повторного открытия меню
+    """
     logger.info(
         'Запущена функция open_menu_month, пользователь нажал на кнопку "{}"'.format(button_text(call)),
         username=call.message.from_user.username,
@@ -213,6 +235,9 @@ def open_menu_month(call: telebot.types.CallbackQuery) -> None:
                       or call.data == 'no_overwrite'
                       and 'Файл с расписанием на указанный месяц уже есть. Перезаписать?' in call.message.text)
 def overwrite_month(call: telebot.types.CallbackQuery) -> None:
+    """
+    Функция обработчик для перезаписи файла или проверки имеющегося в записи
+    """
     logger.info(
         'Запущена функция overwrite_month, пользователь нажал на кнопку "{}"'.format(button_text(call)),
         username=call.message.from_user.username,
@@ -230,9 +255,6 @@ def overwrite_month(call: telebot.types.CallbackQuery) -> None:
         check_file_info = False
     
     elif call.data == 'no_overwrite':
-        
-        # bot.edit_message_reply_markup(chat_id=call.message.chat.id,
-        #                               message_id=call.message.message_id)
         
         msg = bot.edit_message_text(text='Файл с расписанием на указанный месяц уже есть. Перезаписать?\n'
                                          '<i>- <code>Вы выбрали {button}</code></i>'.format(
@@ -257,6 +279,9 @@ def overwrite_month(call: telebot.types.CallbackQuery) -> None:
                       or call.data == 'no_overwrite_final'
                       and call.message.content_type == 'photo')
 def overwrite_month_2(call: telebot.types.CallbackQuery) -> None:
+    """
+    Функция обработчик окончательного принятия решения по перезаписи файла или отмене от операции
+    """
     logger.info(
         'Запущена функция overwrite_month_2, пользователь нажал на кнопку "{}"'.format(button_text(call)),
         username=call.message.from_user.username,

@@ -6,12 +6,9 @@ from utils.logger import logger
 
 def start(message: telebot.types.Message) -> None:
     """
-    Функция, которая формирует сообщение с подсказкой и отправляет Пользователю
-    :param message: В качестве параметра передается сообщение из чата
-    :type message: telebot.types.Message
-    :return: Отправляется сообщение в чат
-    :rtype: telebot.types.Message
-    
+    Функция, которая формирует сообщение с подсказкой и отправляет Пользователю.
+    :param message: В качестве параметра передается сообщение из чата.
+    :return: Сообщение в чат.
     """
     logger.info('Запущена функция c_help.start',
                 username=message.from_user.username,

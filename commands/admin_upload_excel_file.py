@@ -14,9 +14,9 @@ check_file_info = False
 
 def start(message: telebot.types.Message) -> None:
     """
-    .
-    :param message: Принимается сообщение от пользователя.
-    :return: Возвращается приветственное сообщение и открывается меню бота с клавиатурой.
+    Стартовая функция загрузки документа Excel с расписанием
+    :param message: Сообщение от пользователя.
+    :return: Отправляется сообщение и ожидается файл от пользователя
     """
     logger.info('Запущена функция admin_upload_excel_file.start',
                 username=message.chat.username,
@@ -32,6 +32,10 @@ def start(message: telebot.types.Message) -> None:
 
 
 def upload_excel_file_func(message: telebot.types.Message) -> None:
+    """
+    Функция обработки полученного файла. Если такой есть, то предлагает перезаписать
+    param message: Файл с Excel таблицей.
+    """
     logger.info('Запущена функция upload_excel_file_func пользователь отправил в бот файл',
                 username=message.chat.username,
                 user_id=message.chat.id)
@@ -40,7 +44,19 @@ def upload_excel_file_func(message: telebot.types.Message) -> None:
     if not os.path.exists(schedules_excel_dir):
         os.makedirs(schedules_excel_dir)
     
-    if os.path.splitext(bot.get_file(message.document.file_id).file_path)[1] != '.xlsx':
+    if message.document is None:
+        logger.error('Пользователь отправил {}'.
+                     format(message),
+                     username=message.chat.username,
+                     user_id=message.chat.id)
+    
+        msg = bot.send_message(chat_id=message.chat.id,
+                               text='Ошибка. Нужен файл. Повторите отправку')
+    
+        logger.info('Бот отправил сообщение "{}"'.format(msg.text),
+                    user_id=message.chat.id)
+    
+    elif os.path.splitext(bot.get_file(message.document.file_id).file_path)[1] != '.xlsx':
         logger.error('Пользователь отправил файл с неправильным форматом {}'.
                      format(os.path.splitext(bot.get_file(message.document.file_id).file_path)[1]
                             ),
@@ -87,6 +103,10 @@ def upload_excel_file_func(message: telebot.types.Message) -> None:
                       or call.data == 'no_leave_excel'
                       and 'Excel уже есть. Перезаписать?' in call.message.text)
 def overwrite_excel_func(call: telebot.types.CallbackQuery) -> None:
+    """
+    Функция для перезаписи файла Excel
+    param call: Нажатая клавиша клавиатуры.
+    """
     logger.info(
         'Запущена функция overwrite_excel_func, пользователь нажал на кнопку "{}"'.format(button_text(call)),
         username=call.message.from_user.username,

@@ -103,6 +103,7 @@ celerybeat-schedule
 
 # Environments
 .env
+.env_christ_token
 .venv
 env/
 venv/
@@ -129,3 +130,5 @@ dmypy.json
 #
 0.trash/
 schedules/
+/.env_christ_token
+/christian_calendar/jsons/christ_api_token.json

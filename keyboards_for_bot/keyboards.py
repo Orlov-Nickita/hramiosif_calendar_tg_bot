@@ -12,15 +12,15 @@ def RKM_for_the_menu() -> types.ReplyKeyboardMarkup:
         emoji=emoji.emojize(':pray:',
                             language='alias')
     ))
-    # button2 = types.KeyboardButton('Посмотреть календарь {emoji}'.format(
-    #     emoji=emoji.emojize(':clipboard:',
-    #                         language='alias')
-    # ))
+    button2 = types.KeyboardButton('Посмотреть календарь {emoji}'.format(
+        emoji=emoji.emojize(':clipboard:',
+                            language='alias')
+    ))
     
     # button2 = types.KeyboardButton('/admin_panel')
     
-    # rkm_menu.add(button1, button2)
-    rkm_menu.add(button1)
+    rkm_menu.add(button1, button2)
+    # rkm_menu.add(button1)
     
     return rkm_menu
 
@@ -73,11 +73,11 @@ def IKM_week_schedule_choice() -> types.InlineKeyboardMarkup:
     :return: Возвращается следующая клавиатура с выбором других опций
     """
     ikm_week_schedule_choice = types.InlineKeyboardMarkup(row_width=1)
-
+    
     btn1 = types.InlineKeyboardButton(text='Показать расписание текстом', callback_data='text_schedule')
     btn2 = types.InlineKeyboardButton(text='Прислать расписание файлом', callback_data='file_schedule')
     btn3 = types.InlineKeyboardButton(text='Вернуться назад', callback_data='return')
-
+    
     ikm_week_schedule_choice.add(btn1, btn2, btn3)
     
     return ikm_week_schedule_choice
@@ -92,3 +92,25 @@ def IKM_open_schedule() -> types.InlineKeyboardMarkup:
                                                                                     callback_data='open_again'))
     
     return ikm_open_schedule
+
+
+def IKM_photos_sliding() -> types.InlineKeyboardMarkup:
+    """
+    Клавиатура для фотоальбома.
+    :return: Возвращается клавиатура (функция) как объект.
+    :rtype: telegram.InlineKeyboardMarkup
+
+    """
+    ikm_photo_slide = types.InlineKeyboardMarkup(row_width=2)
+    
+    item1 = types.InlineKeyboardButton(
+        text='< Листать фото',
+        callback_data='previous')
+    
+    item2 = types.InlineKeyboardButton(
+        text='Листать фото >',
+        callback_data='next')
+    
+    ikm_photo_slide.add(item1, item2)
+    
+    return ikm_photo_slide

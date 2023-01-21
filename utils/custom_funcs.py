@@ -54,7 +54,19 @@ def button_text(button_call: telebot.types.CallbackQuery):
 def load_photo_or_doc_from_bot(bot, logger, msg: telebot.types.Message, src: str,
                                downloaded_file: bytes, bot_text: str,
                                keyboard: types.InlineKeyboardMarkup = None, photo: bool = False, doc: bool = False):
-    logger.info('Запущена функция load_photo_from_bot',
+    """
+    Функция сохранения файла. Фото или файл. Если присылается файл Excel, то программа проверяет отличие от
+    текущего файла JSON и если есть отличие, то делает перезапись файлов на актуальные данные.
+    param bot: Ссылка на переменную, в которой хранится токен .
+    param msg: Передается сообщение, чтобы по нему определить id сообщения и чата.
+    param src: Путь до файла, куда сохранить.
+    param downloaded_file: Переменная для сохранения файла в байтах.
+    param bot_text: Текст, который бот должен написать в ответ.
+    param keyboard: Клавиатура, которая должна быть применена после ответа бота.
+    param photo: Переключатель функции для работы с фото.
+    param doc: Переключатель функции для работы с Excel.
+    """
+    logger.info('Запущена функция load_photo_or_doc_from_bot',
                 username=msg.from_user.username,
                 user_id=msg.chat.id)
     

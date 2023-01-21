@@ -3,6 +3,7 @@ import os.path
 from loader import log_dir, schedules_main_dir, users_sql_dir, users_sql_file_name
 from message_handlers import *
 from utils.logger import log_main
+import sqlite3 as sq
 
 if __name__ == '__main__':
     print('ok')
@@ -25,5 +26,15 @@ if __name__ == '__main__':
         log_main.info('Создан файл БД {}'.format(users_sql_dir + users_sql_file_name))
 
     log_main.info('Бот запущен')
-    
+
+    with sq.connect(users_sql_dir + users_sql_file_name) as database:
+        cursor = database.cursor()
+        cursor.execute(""" CREATE TABLE IF NOT EXISTS bot_users (
+            Пользователь INTEGER,
+            Дата добавления TEXT,
+            Имя TEXT,
+            Фамилия TEXT,
+            Никнейм TEXT
+            )""")
+
     bot.infinity_polling()

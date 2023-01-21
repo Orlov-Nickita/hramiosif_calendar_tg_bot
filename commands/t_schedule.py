@@ -16,12 +16,11 @@ from utils.custom_funcs import button_text
 """
 Старт
 """
-############################################
 
 
 def start(message: telebot.types.Message) -> None:
     """
-    Функция инициализации
+    Стартовая функция формирования ответа на запрос расписания
     :param message: Сообщение от пользователя из чата
     :return: Бот обрабатывает сообщение и направляет ответ
     """
@@ -41,7 +40,7 @@ def start(message: telebot.types.Message) -> None:
         
         logger.info('Бот ответил "{}"'.format(msg.text),
                     user_id=message.chat.id)
-
+    
     else:
         """
         В данном случае была введена команда, которую бот еще не понимает и потому бот отправляет сообщение с просьбой
@@ -60,16 +59,12 @@ def start(message: telebot.types.Message) -> None:
 """
 
 
-############################################
-
-
 @bot.callback_query_handler(func=lambda call: call.message.content_type == 'text' and call.message.text.startswith(
     'Вы хотите уточнить расписание богослужений') and call.data == 'day')
 def day_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
     """
     Обработчик нажатия на клавиатуру с выбором даты. Выбран пункт "День"
     """
-    
     logger.info(
         'Запущена функция day_choice_keyboard_callback пользователь нажал на кнопку "{}"'.format(button_text(call)),
         username=call.message.from_user.username,
@@ -94,16 +89,12 @@ def day_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
 """
 
 
-############################################
-
-
 @bot.callback_query_handler(func=lambda call: call.message.content_type == 'text' and call.message.text.startswith(
     'На какой день Вы хотели посмотреть расписание') and call.data != 'open_again')
 def date_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
     """
     Обработчик нажатия на клавиатуру с выбором даты. Это для меню на конкретный день
     """
-    
     logger.info(
         'Запущена функция date_choice_keyboard_callback пользователь нажал на кнопку "{}"'.format(button_text(call)),
         username=call.message.from_user.username,
@@ -168,14 +159,11 @@ def date_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
 """
 
 
-############################################
-
-
 @bot.callback_query_handler(func=lambda call: call.message.content_type == 'text' and call.message.text.startswith(
     'Вы хотите уточнить расписание богослужений') and call.data == 'week')
 def week_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
     """
-    Обработчик нажатия на клавиатуру с выбором даты. Выбран пункт "Неделя"
+    Обработчик нажатия на клавиатуру с выбором даты. Выбран пункт "Неделя". Предлагается выбор между текстом и файлом
     """
     
     logger.info(
@@ -198,14 +186,11 @@ def week_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
 """
 
 
-############################################
-
-
 @bot.callback_query_handler(func=lambda call: call.message.content_type == 'text' and call.message.text.startswith(
     'Вы хотели посмотреть расписание на неделю') and call.data != 'open_again')
 def date_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
     """
-    Обработчик нажатия на клавиатуру с выбором даты. Это для меню на конкретный день
+    Обработчик нажатия на клавиатуру с выбором даты. Это для меню на неделю
     """
     logger.info('Запущена функция week_choice_keyboard_callback, '
                 'пользователь нажал на кнопку "{}"'.format(button_text(call)),
@@ -213,7 +198,6 @@ def date_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
                 user_id=call.message.chat.id)
     
     if call.data == 'text_schedule':
-        
         bot.send_chat_action(chat_id=call.message.chat.id, action=ChatAction.TYPING)
         
         today_digit = datetime.datetime.now().strftime("%d")
@@ -296,9 +280,6 @@ def date_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
 """
 
 
-############################################
-
-
 @bot.callback_query_handler(func=lambda call: call.message.content_type == 'text' and call.message.text.startswith(
     'Вы хотите уточнить расписание богослужений') and call.data == 'month')
 def month_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
@@ -339,9 +320,6 @@ def month_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
 """
 
 
-############################################
-
-
 @bot.callback_query_handler(func=lambda call: call.data == 'open_again')
 def date_open_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
     """
@@ -355,7 +333,7 @@ def date_open_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
     
     if 'На какой день Вы хотели посмотреть расписание?' in call.message.text:
         all_days_in_schedule = [i for i in data_from_json(schedules_excel_dir + 'days_list.json') if i != '-']
-
+        
         msg = bot.edit_message_text(text='На какой день Вы хотели посмотреть расписание?',
                                     chat_id=call.message.chat.id,
                                     message_id=call.message.message_id,

@@ -2,25 +2,25 @@ import emoji
 from telebot import types
 
 
-def IKM_admin_panel_main() -> types.InlineKeyboardMarkup:
+def IKM_admin_panel_short() -> types.InlineKeyboardMarkup:
     """
-    Клавиатура для панели управления.
+    Клавиатура для панели управления с определенными действиями.
     :return: Возвращается клавиатура.
     """
-    ikm_admin_panel_main = types.InlineKeyboardMarkup(row_width=1)
+    ikm_admin_panel_short = types.InlineKeyboardMarkup(row_width=1)
     
     btn1 = types.InlineKeyboardButton(
-        text='{emoji} Загрузить фото расписания на неделю'.format(
+        text='{emoji} Фото расписания на неделю'.format(
             emoji=emoji.emojize(':camera:',
                                 language='alias')),
         callback_data='upload_week_photo')
     
     btn2 = types.InlineKeyboardButton(
-        text='{emoji} Загрузить фото расписания на месяц'.format(
+        text='{emoji} Фото расписания на месяц'.format(
             emoji=emoji.emojize(':camera:',
                                 language='alias')),
         callback_data='upload_month_photo')
-
+    
     btn3 = types.InlineKeyboardButton(
         text='{emoji} Excel файл расписания на месяц'.format(
             emoji=emoji.emojize(':bookmark_tabs:',
@@ -28,41 +28,86 @@ def IKM_admin_panel_main() -> types.InlineKeyboardMarkup:
         callback_data='upload_excel_file')
     
     btn4 = types.InlineKeyboardButton(
+        text='{emoji} Подписчики'.format(
+            emoji=emoji.emojize(':restroom:',
+                                language='alias')),
+        callback_data='followers')
+    
+    ikm_admin_panel_short.add(btn1, btn2, btn3, btn4)
+    
+    return ikm_admin_panel_short
+
+
+def IKM_admin_panel_main() -> types.InlineKeyboardMarkup:
+    """
+    Клавиатура для панели управления со всеми функциями для главного администратора.
+    :return: Возвращается клавиатура.
+    """
+    ikm_admin_panel_main = types.InlineKeyboardMarkup(row_width=1)
+    
+    btn1 = types.InlineKeyboardButton(
+        text='{emoji} Фото расписания на неделю'.format(
+            emoji=emoji.emojize(':camera:',
+                                language='alias')),
+        callback_data='upload_week_photo')
+    
+    btn2 = types.InlineKeyboardButton(
+        text='{emoji} Фото расписания на месяц'.format(
+            emoji=emoji.emojize(':camera:',
+                                language='alias')),
+        callback_data='upload_month_photo')
+    
+    btn3 = types.InlineKeyboardButton(
+        text='{emoji} Excel файл расписания на месяц'.format(
+            emoji=emoji.emojize(':bookmark_tabs:',
+                                language='alias')),
+        callback_data='upload_excel_file')
+    
+    btn4 = types.InlineKeyboardButton(
+        text='{emoji} Прислать файл БД'.format(
+            emoji=emoji.emojize(':passport_control:',
+                                language='alias')),
+        callback_data='sql_bd_download')
+    
+    btn5 = types.InlineKeyboardButton(
+        text='{emoji} Проверить ошибки лог-файла'.format(
+            emoji=emoji.emojize(':interrobang:',
+                                language='alias')),
+        callback_data='logs_check_errors')
+    
+    btn6 = types.InlineKeyboardButton(
         text='{emoji} Прислать лог-файл'.format(
             emoji=emoji.emojize(':blue_book:',
                                 language='alias')),
         callback_data='logs_download')
     
-    btn5 = types.InlineKeyboardButton(
+    btn7 = types.InlineKeyboardButton(
         text='{emoji} Очистить лог-файл'.format(
             emoji=emoji.emojize(':recycle:',
                                 language='alias')),
         callback_data='logs_trash')
-
-    btn6 = types.InlineKeyboardButton(
-        text='{emoji} Посмотреть жесткий диск'.format(
-            emoji=emoji.emojize(':floppy_disk:',
+    
+    btn8 = types.InlineKeyboardButton(
+        text='{emoji} Подписчики'.format(
+            emoji=emoji.emojize(':restroom:',
                                 language='alias')),
-        callback_data='show_hdd')
+        callback_data='followers')
     
-    # btn5 = types.InlineKeyboardButton(
-    #     text='{emoji} Очистить жесткий диск'.format(
-    #         emoji=emoji.emojize(':recycle:',
-    #                             language='alias')),
-    #     callback_data='remove_hdd')
+    btn9 = types.InlineKeyboardButton(
+        text='{emoji} Сообщить об обновлениях'.format(
+            emoji=emoji.emojize(':boom:',
+                                language='alias')),
+        callback_data='send_update_message')
     
-    # btn6 = types.InlineKeyboardButton(text='', callback_data='')
-    # btn7 = types.InlineKeyboardButton(text='', callback_data='')
-    
-    # ikm_admin_panel_main.add(btn1, btn2, btn3)
-    ikm_admin_panel_main.add(btn1, btn2, btn3, btn4, btn5, btn6)
+    ikm_admin_panel_main.add(btn1, btn2, btn3, btn4,
+                             btn5, btn6, btn7, btn8, btn9)
     
     return ikm_admin_panel_main
 
 
 def IKM_admin_week_save_photo() -> types.InlineKeyboardMarkup:
     """
-    Клавиатура для присвоения названия для фото.
+    Клавиатура для присвоения названия для фото для недельного расписания.
     :return: Возвращается клавиатура.
     """
     ikm_admin_week_save_photo = types.InlineKeyboardMarkup(row_width=2)
@@ -94,7 +139,7 @@ def IKM_admin_month_save_photo() -> types.InlineKeyboardMarkup:
 
 def IKM_admin_save_photo_again() -> types.InlineKeyboardMarkup:
     """
-    Отправить еще фото или закрыть меню.
+    Отправить еще фото или закрыть меню для месячного расписания.
     :return: Возвращается клавиатура.
     """
     ikm_admin_save_photo_again = types.InlineKeyboardMarkup(row_width=2)
@@ -109,7 +154,7 @@ def IKM_admin_save_photo_again() -> types.InlineKeyboardMarkup:
 
 def IKM_admin_overwrite_file_first_choice() -> types.InlineKeyboardMarkup:
     """
-    Отправить еще фото или закрыть меню.
+    Клавиатура с возможностью оценить перезаписываемый файл.
     :return: Возвращается клавиатура.
     """
     ikm_admin_overwrite_file_first_choice = types.InlineKeyboardMarkup(row_width=1)
@@ -118,13 +163,13 @@ def IKM_admin_overwrite_file_first_choice() -> types.InlineKeyboardMarkup:
     btn2 = types.InlineKeyboardButton(text='Нет, посмотреть файл перед удалением', callback_data='no_overwrite')
     
     ikm_admin_overwrite_file_first_choice.add(btn1, btn2)
-
+    
     return ikm_admin_overwrite_file_first_choice
 
 
 def IKM_admin_overwrite_file_second_choice() -> types.InlineKeyboardMarkup:
     """
-    Отправить еще фото или закрыть меню.
+    Клаивиатура с возможностью перезаписать или оставить имеющийся файл.
     :return: Возвращается клавиатура.
     """
     ikm_admin_overwrite_file_second_choice = types.InlineKeyboardMarkup(row_width=1)
@@ -139,7 +184,7 @@ def IKM_admin_overwrite_file_second_choice() -> types.InlineKeyboardMarkup:
 
 def IKM_admin_overwrite_excel_file() -> types.InlineKeyboardMarkup:
     """
-    Отправить еще фото или закрыть меню.
+    Клаиватура с возможностью перезаписать или сотавить имеющийся файл Excel.
     :return: Возвращается клавиатура.
     """
     ikm_admin_overwrite_excel_file = types.InlineKeyboardMarkup(row_width=1)
@@ -150,6 +195,7 @@ def IKM_admin_overwrite_excel_file() -> types.InlineKeyboardMarkup:
     ikm_admin_overwrite_excel_file.add(btn1, btn2)
     
     return ikm_admin_overwrite_excel_file
+
 
 def IKM_admin_check_hdd(files: list) -> types.InlineKeyboardMarkup:
     """
@@ -175,3 +221,62 @@ def IKM_admin_open_menu() -> types.InlineKeyboardMarkup:
                                                                                       callback_data='open_menu_again'))
     
     return ikm_admin_open_menu
+
+
+def IKM_admin_log_remove_conf() -> types.InlineKeyboardMarkup:
+    """
+    Подтверждение очистки лог файла.
+    :return: Клавиатура (функция) как объект.
+    :rtype: telegram.InlineKeyboardMarkup
+    """
+    ikm_admin_log_remove_conf = types.InlineKeyboardMarkup(row_width=2)
+    
+    item1 = types.InlineKeyboardButton(
+        text='Да',
+        callback_data='yes_remove_log')
+    
+    item2 = types.InlineKeyboardButton(
+        text='Нет',
+        callback_data='no_remove_log')
+    
+    ikm_admin_log_remove_conf.add(item1, item2)
+    
+    return ikm_admin_log_remove_conf
+
+
+def IKM_admin_update_send_conf() -> types.InlineKeyboardMarkup:
+    """
+    Подтверждение отправки сообщений с обновлениями.
+    :return: Клавиатура (функция) как объект.
+    :rtype: telegram.InlineKeyboardMarkup
+    """
+    ikm_admin_update_send_conf = types.InlineKeyboardMarkup(row_width=2)
+    
+    item1 = types.InlineKeyboardButton(
+        text='Да',
+        callback_data='yes_send_upd_msg')
+    
+    item2 = types.InlineKeyboardButton(
+        text='Нет',
+        callback_data='no_send_upd_msg')
+    
+    ikm_admin_update_send_conf.add(item1, item2)
+    
+    return ikm_admin_update_send_conf
+
+
+def IKM_admin_errors_log_send() -> types.InlineKeyboardMarkup:
+    """
+    Подтверждение отправки ошибок из лог файла.
+    :return: Клавиатура (функция) как объект.
+    :rtype: telegram.InlineKeyboardMarkup
+    """
+    ikm_admin_errors_log_send = types.InlineKeyboardMarkup(row_width=2)
+    
+    item1 = types.InlineKeyboardButton(
+        text='Прислать ошибки',
+        callback_data='yes_send_errors_log')
+    
+    ikm_admin_errors_log_send.add(item1)
+    
+    return ikm_admin_errors_log_send

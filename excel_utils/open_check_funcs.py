@@ -6,7 +6,7 @@ from loader import all_months_in_calendar
 
 def remove_timestamp_from_dataframe(dt):
     """
-    
+    Вспомогательная функция для очистки всех Timestamp из Excel файла после переноса в DataFrame в Pandas
     """
     if dt != '-':
         return dt.strftime('%d {}'.format(all_months_in_calendar[int(dt.strftime('%m')) - 1]))
@@ -17,7 +17,9 @@ def remove_timestamp_from_dataframe(dt):
 
 def open_to_dict(excel_file: str) -> dict:
     """
-    
+    Функция открывает файл Excel, убирает все пустые строчки и Timestamp, затем из DataFrame переделывает в словарь
+    "Название столбца": {"Индекс (номер строки)": "Текст ячейки"}
+    param excel_file: Путь до файла с Excel таблицей
     """
     new_ex_f = pd.read_excel(excel_file)
     data_from_excel = pd.DataFrame(new_ex_f)
@@ -28,7 +30,9 @@ def open_to_dict(excel_file: str) -> dict:
 
 def data_to_json(json_file: str, data_dict_or_list: dict or list) -> None:
     """
-    
+    Функция зиписи информации из словаря или списка в файл в формате JSON
+    param json_file: Имя или путь+имя файла куда будет запись
+    param data_dict_or_list: Словарь / список
     """
     with open(json_file, 'w', encoding="utf-8") as temp_f:
         json.dump(data_dict_or_list, temp_f, indent=4, ensure_ascii=False)
@@ -36,7 +40,8 @@ def data_to_json(json_file: str, data_dict_or_list: dict or list) -> None:
 
 def data_from_json(json_file: str) -> dict or list:
     """
-    
+    Функция выгружает из файла JSON всю информацию
+    param json_file: Файл, из которого надо загрузить информацию
     """
     with open(json_file, 'r', encoding='utf-8') as temp_k:
         js_dict = temp_k.read()
@@ -45,7 +50,8 @@ def data_from_json(json_file: str) -> dict or list:
 
 def str_to_int_key(i_dict: dict) -> dict:
     """
-    
+    Функция превращает все строковые ключи словаря в формат числа
+    param i_dict: Словарь, в котором ключом является число, но оно записано в формате str, а нужно в int
     """
     for key in i_dict:
         temp_list = []
@@ -58,6 +64,10 @@ def str_to_int_key(i_dict: dict) -> dict:
     return i_dict
 
 def reversed_dict_days_and_row_index(i_dict: dict):
+    """
+    Функция, которая меняет местами ключ и значение
+    param i_dict: Словарь, в котором надо поменять местами ключ и значение
+    """
     days_and_ind = {}
     for key in i_dict:
         if key == [key_j for key_j in i_dict.keys()][0]:
@@ -67,7 +77,8 @@ def reversed_dict_days_and_row_index(i_dict: dict):
 
 def to_lists_of_column(excel_dict: dict) -> tuple:
     """
-    
+    Функция из принимаемого словаря (предварительно на 3 столбца) возвращает кортеж с 3 списками по каждому столбцу
+    param excel_dict: Словарь из Excel файла после функции open_to_dict
     """
     date_col, saint_col, sch_col = [], [], []
     for key_i in excel_dict:
@@ -84,13 +95,8 @@ def to_lists_of_column(excel_dict: dict) -> tuple:
 
 def check_new_file(new_file: str, filejson: str) -> bool:
     """
-    
+    Функция проверки нового загружаемого файла Excel и текущего записанного JSON файла
+    param new_file: Новый файл Excel
+    param filejson: Текущий файл с информацией JSON
     """
     return open_to_dict(new_file) == str_to_int_key(data_from_json(filejson))
-
-
-# def update_variables_file(file_with_variables: str, lists: str) -> None:
-    # with open(file_with_variables, 'w') as file:
-    #     file.write('aasd')
-    # with open(file_with_variables, 'w', encoding="utf-8") as temp:
-    #     json.dump(lists, temp, indent=4, ensure_ascii=False)

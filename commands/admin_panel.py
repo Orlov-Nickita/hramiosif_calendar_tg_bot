@@ -1,11 +1,10 @@
 import emoji
 import telebot
 from telegram import ParseMode
-
-from commands import admin_photo_week_load, admin_logs, admin_photo_month_load, __admin_hdd_check, \
-    admin_upload_excel_file
-from keyboards_for_bot.admin_keyboards import IKM_admin_panel_main, IKM_admin_open_menu
-from loader import bot
+from commands import admin_photo_week_load, admin_logs, admin_photo_month_load, \
+    admin_upload_excel_file, admin_sql
+from keyboards_for_bot.admin_keyboards import IKM_admin_panel_main, IKM_admin_open_menu, IKM_admin_panel_short
+from loader import bot, administrators
 from utils.logger import logger
 from utils.custom_funcs import button_text
 
@@ -20,22 +19,40 @@ def start(message: telebot.types.Message) -> None:
                 username=message.from_user.username,
                 user_id=message.chat.id)
     
-    msg = bot.send_message(chat_id=message.chat.id,
-                           text='{emoji} Панель управления {emoji}'.format(
-                               emoji=emoji.emojize(':open_file_folder:',
-                                                   language='alias')),
-                           reply_markup=IKM_admin_panel_main(),
-                           parse_mode=ParseMode.HTML)
+    if message.from_user.id == administrators['Никита']:
+        msg = bot.send_message(chat_id=message.chat.id,
+                               text='{emoji} Панель управления {emoji}'.format(
+                                   emoji=emoji.emojize(':open_file_folder:',
+                                                       language='alias')),
+                               reply_markup=IKM_admin_panel_main(),
+                               parse_mode=ParseMode.HTML)
+    
+    else:
+        
+        msg = bot.send_message(chat_id=message.chat.id,
+                               text='{emoji} Панель управления {emoji}'.format(
+                                   emoji=emoji.emojize(':open_file_folder:',
+                                                       language='alias')),
+                               reply_markup=IKM_admin_panel_short(),
+                               parse_mode=ParseMode.HTML)
     
     logger.info('Бот отправил сообщение\n"{}"'.format(msg.text),
                 user_id=message.chat.id)
 
 
-@bot.callback_query_handler(
-    func=lambda call: call.data == 'upload_week_photo' and 'Панель управления' in call.message.text)
-def save_schedule_to_the_week(call: telebot.types.CallbackQuery) -> None:
+@bot.callback_query_handler(func=lambda call: call.data == 'upload_week_photo'
+                                              or call.data == 'upload_month_photo'
+                                              or call.data == 'upload_excel_file'
+                                              or call.data == 'sql_bd_download'
+                                              or call.data == 'logs_download'
+                                              or call.data == 'logs_trash'
+                                              or call.data == 'logs_check_errors'
+                                              or call.data == 'followers'
+                                              or call.data == 'send_update_message'
+                                              and 'Панель управления' in call.message.text)
+def admin_panels_funcs(call: telebot.types.CallbackQuery) -> None:
     logger.info(
-        'Запущена функция save_schedule_to_the_week, пользователь нажал на кнопку "{}"'.format(button_text(call)),
+        'Запущена функция admin_panels_funcs, пользователь нажал на кнопку "{}"'.format(button_text(call)),
         username=call.message.from_user.username,
         user_id=call.message.chat.id)
     
@@ -43,66 +60,30 @@ def save_schedule_to_the_week(call: telebot.types.CallbackQuery) -> None:
                                   message_id=call.message.message_id,
                                   reply_markup=IKM_admin_open_menu())
     
-    admin_photo_week_load.start_week(call.message)
-
-
-@bot.callback_query_handler(
-    func=lambda call: call.data == 'upload_month_photo' and 'Панель управления' in call.message.text)
-def save_schedule_to_the_month(call: telebot.types.CallbackQuery) -> None:
-    logger.info(
-        'Запущена функция save_schedule_to_the_month, пользователь нажал на кнопку "{}"'.format(button_text(call)),
-        username=call.message.from_user.username,
-        user_id=call.message.chat.id)
+    if call.data == 'upload_week_photo':
+        admin_photo_week_load.start_week(call.message)
     
-    bot.edit_message_reply_markup(chat_id=call.message.chat.id,
-                                  message_id=call.message.message_id,
-                                  reply_markup=IKM_admin_open_menu())
+    if call.data == 'upload_month_photo':
+        admin_photo_month_load.start_month(call.message)
     
-    admin_photo_month_load.start_month(call.message)
-
-
-@bot.callback_query_handler(
-    func=lambda call: call.data == 'upload_excel_file' and 'Панель управления' in call.message.text)
-def upload_excel_file(call: telebot.types.CallbackQuery) -> None:
-    logger.info(
-        'Запущена функция upload_excel_file, пользователь нажал на кнопку "{}"'.format(button_text(call)),
-        username=call.message.from_user.username,
-        user_id=call.message.chat.id)
+    if call.data == 'upload_excel_file':
+        admin_upload_excel_file.start(call.message)
     
-    admin_upload_excel_file.start(call.message)
-
-
-@bot.callback_query_handler(func=lambda call: call.data == 'logs_download' and 'Панель управления' in call.message.text)
-def pull_log_file(call: telebot.types.CallbackQuery) -> None:
-    logger.info(
-        'Запущена функция pull_log_file, пользователь нажал на кнопку "{}"'.format(button_text(call)),
-        username=call.message.from_user.username,
-        user_id=call.message.chat.id)
+    if call.data == 'sql_bd_download':
+        admin_sql.upload_sql(call.message)
     
-    admin_logs.upload_logs(call.message)
-
-
-@bot.callback_query_handler(func=lambda call: call.data == 'logs_trash' and 'Панель управления' in call.message.text)
-def remove_log_file(call: telebot.types.CallbackQuery) -> None:
-    logger.info(
-        'Запущена функция remove_log_file, пользователь нажал на кнопку "{}"'.format(button_text(call)),
-        username=call.message.from_user.username,
-        user_id=call.message.chat.id)
+    if call.data == 'logs_download':
+        admin_logs.upload_logs(call.message)
     
-    admin_logs.remove_logs(call.message)
-
-
-@bot.callback_query_handler(func=lambda call: call.data == 'show_hdd' and 'Панель управления' in call.message.text)
-def showing_hdd(call: telebot.types.CallbackQuery) -> None:
-    logger.info(
-        'Запущена функция showing_hdd, пользователь нажал на кнопку "{}"'.format(button_text(call)),
-        username=call.message.from_user.username,
-        user_id=call.message.chat.id)
+    if call.data == 'logs_trash':
+        admin_logs.remove_logs(call.message)
     
-    # __admin_hdd_check.start(call.message)
-    pass
-
-
-@bot.callback_query_handler(func=lambda call: call.data == 'remove_hdd' and 'Панель управления' in call.message.text)
-def removing_hdd(call: telebot.types.CallbackQuery) -> None:
-    pass
+    if call.data == 'logs_check_errors':
+        admin_logs.check_errors(call.message)
+    
+    if call.data == 'followers':
+        admin_sql.followers_func(call.message)
+    
+    if call.data == 'send_update_message':
+        pass
+        # admin_send_update_msg.start(call.message)

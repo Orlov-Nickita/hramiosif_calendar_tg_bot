@@ -1,6 +1,7 @@
 import telebot.types
 from telegram import ParseMode
 
+from christian_calendar import send_information
 from commands import t_schedule, c_start, c_help, c_keyboard, admin_panel
 from loader import bot, administrators
 from utils.logger import logger
@@ -9,7 +10,7 @@ from utils.logger import logger
 @bot.message_handler(commands=['start'])
 def send_welcome_func(message: telebot.types.Message) -> None:
     """
-    Функция, которая реагирует на команду /start при запуске бота и отправляет Пользователю приветствие
+    Отправляет Пользователю стартовое сообщение
     :param message: В качестве параметра передается сообщение из чата
     :type message: telebot.types.Message
     :return: Отправляется сообщение в чат
@@ -25,7 +26,7 @@ def send_welcome_func(message: telebot.types.Message) -> None:
 @bot.message_handler(commands=['help'])
 def help_command_func(message: telebot.types.Message) -> None:
     """
-    Функция, которая реагирует на команду /help и отправляет Пользователю вспомогательное сообщение с подсказками
+    Отправляет Пользователю вспомогательное сообщение с подсказками
     :param message: В качестве параметра передается сообщение из чата
     :type message: telebot.types.Message
     :return: Отправляется сообщение в чат
@@ -42,7 +43,7 @@ def help_command_func(message: telebot.types.Message) -> None:
 @bot.message_handler(commands=['keyboard'])
 def keyboard_open(message: telebot.types.Message) -> None:
     """
-    Функция, которая реагирует на команду /start при запуске бота и отправляет Пользователю приветствие
+    Открывает Пользователю клавиатуру внизу
     :param message: В качестве параметра передается сообщение из чата
     :type message: telebot.types.Message
     :return: Отправляется сообщение в чат
@@ -56,17 +57,17 @@ def keyboard_open(message: telebot.types.Message) -> None:
     c_keyboard.start(message)
 
 
-@bot.message_handler(commands=['admin_panel'])
+@bot.message_handler(commands=['admin'])
 def admin_panel_func(message: telebot.types.Message) -> None:
     """
-    Функция, которая реагирует на команду /start при запуске бота и отправляет Пользователю приветствие
+    Открывает панель управления для администраторов
     :param message: В качестве параметра передается сообщение из чата
     :type message: telebot.types.Message
     :return: Отправляется сообщение в чат
     :rtype telebot.types.Message
 
     """
-    logger.info('Запущена команда /_admin_panel',
+    logger.info('Запущена команда /admin',
                 username=message.from_user.username,
                 user_id=message.chat.id)
     
@@ -75,7 +76,7 @@ def admin_panel_func(message: telebot.types.Message) -> None:
     
     else:
         bot.send_message(chat_id=message.chat.id,
-                         text='Вы не можете выполнить команду, потому что Вы не Администратор')
+                         text='У Вас нет прав доступа')
         
         bot.send_message(chat_id=administrators['Никита'],
                          text='Пользователь '
@@ -107,6 +108,9 @@ def text_func(message: telebot.types.Message):
     
     if message.text.startswith('Уточнить расписание богослужений'):
         t_schedule.start(message)
+    
+    elif message.text.startswith('Посмотреть календарь'):
+        send_information.start(message)
     
     else:
         bot.send_message(chat_id=message.chat.id,
