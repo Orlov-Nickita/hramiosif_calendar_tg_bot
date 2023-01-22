@@ -1,14 +1,13 @@
 import time
-
-import emoji
 import telebot
 from telegram import ParseMode
-
 from keyboards_for_bot.admin_keyboards import IKM_admin_update_send_conf
-from loader import bot, users_sql_dir, users_sql_file_name
+from loader import bot, users_sql_dir, users_sql_file_name, hdd_dir, update_jgp
 from utils.custom_funcs import button_text
 from utils.logger import logger
 from utils.sql_funcs import get_info_from_sql
+
+update_msg_text = ''
 
 
 def start(message: telebot.types.Message) -> None:
@@ -21,19 +20,28 @@ def start(message: telebot.types.Message) -> None:
                 username=message.from_user.username,
                 user_id=message.chat.id)
     
-    all_persons = get_info_from_sql(sql_base=users_sql_dir + users_sql_file_name,
-                                    message=message)
+    # all_persons = get_info_from_sql(sql_base=users_sql_dir + users_sql_file_name,
+    #                                 message=message)
+    
+    all_persons = [459901923, 434895679]
+    # all_persons = [949421028]
 
-    update_msg_text = 'Ура! Обновление!'
-
-    bot.send_message(chat_id=message.chat.id,
-                     text=f'Будет отправлено {len(all_persons)} сообщений.\n'
-                          f'Выглядеть будет так:\n'
-                          f'\n'
-                          f'{update_msg_text}\n'
-                          f'\n'
-                          f'Подтвердите отправку',
-                     reply_markup=IKM_admin_update_send_conf())
+    global update_msg_text
+    update_msg_text = 'Обновление!\n' \
+                      '1. Внесено изменение в формат хранимого файла для расписания на месяц. Теперь расписание на ' \
+                      'месяц должно храниться в PDF\n' \
+                      '2. Теперь в списке дней для вывода расписания показываются все дни начиная с текущего ' \
+                      '(предыдущие не показываются)'
+    
+    bot.send_photo(chat_id=message.chat.id,
+                   photo=open(hdd_dir + update_jgp, 'rb'),
+                   caption=f'Будет отправлено {len(all_persons)} сообщений.\n'
+                           f'Выглядеть будет так:\n'
+                           f'\n'
+                           f'{update_msg_text}\n'
+                           f'\n'
+                           f'Подтвердите отправку',
+                   reply_markup=IKM_admin_update_send_conf())
 
 
 @bot.callback_query_handler(
@@ -50,6 +58,8 @@ def send_update_msg_confirm(call: telebot.types.CallbackQuery) -> None:
         user_id=call.message.chat.id)
     
     if call.data == 'no_send_upd_msg':
+        bot.delete_message(chat_id=call.message.chat.id,
+                           message_id=call.message.message_id)
         
         bot.send_message(chat_id=call.message.chat.id,
                          text='Отправка сообщения отменена')
@@ -58,17 +68,24 @@ def send_update_msg_confirm(call: telebot.types.CallbackQuery) -> None:
                     user_id=call.message.chat.id)
     
     else:
+        global update_msg_text
         
-        update_msg_text = 'Ура! Обновление!'
+        # all_persons = get_info_from_sql(sql_base=users_sql_dir + users_sql_file_name,
+        #                                 message=message)
         
-        all_persons = get_info_from_sql(sql_base=users_sql_dir + users_sql_file_name,
-                                        message=call.message)
+        all_persons = [459901923, 434895679]
+        # all_persons = [949421028]
+        
         count_txt = 0
         for person in all_persons:
             time.sleep(0.5)
-            bot.send_message(chat_id=person[0],
-                             text=update_msg_text,
-                             parse_mode=ParseMode.HTML)
+            print(update_msg_text)
+
+            bot.send_photo(chat_id=person,
+                           photo=open(hdd_dir + update_jgp, 'rb'),
+                           caption=update_msg_text,
+                           parse_mode=ParseMode.HTML)
+            
             count_txt += 1
         
         logger.info('Бот разослал сообщения пользователям из базы данных {bd_list}.\n'

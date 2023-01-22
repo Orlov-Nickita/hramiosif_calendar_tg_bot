@@ -1,5 +1,9 @@
+import datetime
+
 import emoji
 from telebot import types
+
+from loader import all_months_in_calendar
 
 
 def RKM_for_the_menu() -> types.ReplyKeyboardMarkup:
@@ -17,10 +21,7 @@ def RKM_for_the_menu() -> types.ReplyKeyboardMarkup:
                             language='alias')
     ))
     
-    # button2 = types.KeyboardButton('/admin_panel')
-    
     rkm_menu.add(button1, button2)
-    # rkm_menu.add(button1)
     
     return rkm_menu
 
@@ -48,6 +49,14 @@ def IKM_date_schedule_choice(days_list: list) -> types.InlineKeyboardMarkup:
     :return: Сообщение с кнопками для выбора даты.
     """
     ikm_date_schedule_choice = types.InlineKeyboardMarkup(row_width=2)
+    
+    today_digit = datetime.datetime.now().strftime("%d")
+    month_digit = int(datetime.datetime.now().strftime("%m"))
+    
+    current_date = '{day} {month}'.format(day=today_digit,
+                                          month=all_months_in_calendar[month_digit - 1])
+    
+    days_list = days_list[days_list.index(current_date):]
     
     for every_day in range(0, len(days_list), 2):
         if every_day != days_list.index(days_list[-1]):

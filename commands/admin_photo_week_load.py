@@ -5,7 +5,7 @@ from telegram import ParseMode
 from commands.admin_photo_month_load import start_month
 from errors import FileError
 from keyboards_for_bot.admin_keyboards import IKM_admin_week_save_photo, IKM_admin_save_photo_again, \
-    IKM_admin_panel_main, IKM_admin_overwrite_file_first_choice, IKM_admin_overwrite_file_second_choice
+    IKM_admin_overwrite_file_first_choice, IKM_admin_overwrite_file_second_choice
 from loader import bot, schedule_photo_week_dir, week_photo_name
 from utils.logger import logger
 from utils.custom_funcs import button_text, load_photo_or_doc_from_bot
@@ -200,6 +200,7 @@ def download_photo_week(message: telebot.types.Message) -> None:
                 load_photo_or_doc_from_bot(bot=bot, logger=logger, msg=message,
                                            src=src, downloaded_file=downloaded_file,
                                            bot_text='Расписание на неделю загружено',
+                                           other_week=True,
                                            keyboard=IKM_admin_save_photo_again())
                 global check_file_info
                 check_file_info = False
@@ -211,26 +212,8 @@ def download_photo_week(message: telebot.types.Message) -> None:
 
 
 @bot.callback_query_handler(
-    func=lambda call: call.data == 'open_menu_again'
-                      and 'Панель управления' in call.message.text)
-def open_menu_week(call: telebot.types.CallbackQuery) -> None:
-    """
-    Функция обработчик повторного открытия меню
-    """
-    logger.info(
-        'Запущена функция open_menu_week, пользователь нажал на кнопку "{}"'.format(button_text(call)),
-        username=call.message.from_user.username,
-        user_id=call.message.chat.id)
-    
-    if call.data == 'open_menu_again':
-        bot.edit_message_reply_markup(chat_id=call.message.chat.id,
-                                      message_id=call.message.message_id,
-                                      reply_markup=IKM_admin_panel_main())
-
-
-@bot.callback_query_handler(
-    func=lambda call: call.data == 'yes_overwrite'
-                      or call.data == 'no_overwrite'
+    func=lambda call: (call.data == 'yes_overwrite'
+                      or call.data == 'no_overwrite')
                       and 'Файл с расписанием на указанную неделю уже есть. Перезаписать?' in call.message.text)
 def overwrite_week(call: telebot.types.CallbackQuery) -> None:
     """

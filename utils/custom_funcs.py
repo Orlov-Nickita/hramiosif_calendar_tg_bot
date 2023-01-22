@@ -53,7 +53,8 @@ def button_text(button_call: telebot.types.CallbackQuery):
 
 def load_photo_or_doc_from_bot(bot, logger, msg: telebot.types.Message, src: str,
                                downloaded_file: bytes, bot_text: str,
-                               keyboard: types.InlineKeyboardMarkup = None, photo: bool = False, doc: bool = False):
+                               keyboard: types.InlineKeyboardMarkup = None, photo: bool = False, doc: bool = False,
+                               other_week: bool = False):
     """
     Функция сохранения файла. Фото или файл. Если присылается файл Excel, то программа проверяет отличие от
     текущего файла JSON и если есть отличие, то делает перезапись файлов на актуальные данные.
@@ -118,7 +119,12 @@ def load_photo_or_doc_from_bot(bot, logger, msg: telebot.types.Message, src: str
                                  json_file=schedules_excel_dir + json_excel_file)))
                 data_to_json(json_file=schedules_excel_dir + json_saints, data_dict_or_list=list_of_col[1])
                 data_to_json(json_file=schedules_excel_dir + json_timing, data_dict_or_list=list_of_col[2])
-
+        
+        elif other_week:
+            msg_func = bot.send_message(chat_id=msg.chat.id,
+                                        text=bot_text,
+                                        reply_markup=keyboard)
+        
         else:
             msg_func = bot.edit_message_text(chat_id=msg.chat.id,
                                              message_id=msg.message_id,

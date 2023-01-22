@@ -6,7 +6,9 @@ from telegram import ChatAction, ParseMode
 
 from excel_utils.open_check_funcs import data_from_json
 from excel_utils.parsing_funcs import schedule_for_a_specific_day, schedule_for_some_days
-from loader import bot, all_months_in_calendar, schedule_photo_week_file, schedule_photo_month_file, schedules_excel_dir
+from loader import bot, all_months_in_calendar, \
+    schedules_excel_dir, json_days_list, schedule_photo_week_dir, week_photo_name, month_photo_name, \
+    schedule_photo_month_dir
 from utils.logger import logger
 from keyboards_for_bot.keyboards import IKM_schedule_option, IKM_date_schedule_choice, IKM_open_schedule, \
     IKM_week_schedule_choice
@@ -72,7 +74,7 @@ def day_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
     
     bot.send_chat_action(chat_id=call.message.chat.id, action=ChatAction.TYPING)
     
-    days = [i for i in data_from_json(schedules_excel_dir + 'days_list.json') if i != '-']
+    days = [i for i in data_from_json(schedules_excel_dir + json_days_list) if i != '-']
     
     msg = bot.edit_message_text(chat_id=call.message.chat.id,
                                 message_id=call.message.message_id,
@@ -232,9 +234,9 @@ def date_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
         
         this_week_digit = int(datetime.datetime.now().strftime("%U"))
         
-        if os.path.exists(schedule_photo_week_file.format(num_week=this_week_digit)):
+        if os.path.exists(schedule_photo_week_dir + week_photo_name.format(number=this_week_digit)):
             bot.send_photo(chat_id=call.message.chat.id,
-                           photo=open(schedule_photo_week_file.format(num_week=this_week_digit),
+                           photo=open(schedule_photo_week_dir + week_photo_name.format(number=this_week_digit),
                                       'rb'))
             
             logger.info('Бот отправил фото week_{}.jpg'.format(this_week_digit),
@@ -296,12 +298,12 @@ def month_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
     
     this_month_digit = int(datetime.datetime.now().strftime("%m"))
     
-    if os.path.exists(schedule_photo_month_file.format(num_month=this_month_digit)):
-        bot.send_photo(chat_id=call.message.chat.id,
-                       photo=open(schedule_photo_month_file.format(num_month=this_month_digit),
-                                  'rb'))
+    if os.path.exists(schedule_photo_month_dir + month_photo_name.format(number=this_month_digit)):
+        bot.send_document(chat_id=call.message.chat.id,
+                          document=open(schedule_photo_month_dir + month_photo_name.format(number=this_month_digit),
+                                        'rb'))
         
-        logger.info('Бот отправил фото month_{}.jpg'.format(this_month_digit),
+        logger.info('Бот отправил фото month_{}.pdf'.format(this_month_digit),
                     user_id=call.message.chat.id)
     
     else:

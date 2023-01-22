@@ -10,13 +10,13 @@ def IKM_admin_panel_short() -> types.InlineKeyboardMarkup:
     ikm_admin_panel_short = types.InlineKeyboardMarkup(row_width=1)
     
     btn1 = types.InlineKeyboardButton(
-        text='{emoji} Фото расписания на неделю'.format(
+        text='{emoji} JPG|PNG фото расписания на неделю'.format(
             emoji=emoji.emojize(':camera:',
                                 language='alias')),
         callback_data='upload_week_photo')
     
     btn2 = types.InlineKeyboardButton(
-        text='{emoji} Фото расписания на месяц'.format(
+        text='{emoji} PDF файл расписания на месяц'.format(
             emoji=emoji.emojize(':camera:',
                                 language='alias')),
         callback_data='upload_month_photo')
@@ -46,13 +46,13 @@ def IKM_admin_panel_main() -> types.InlineKeyboardMarkup:
     ikm_admin_panel_main = types.InlineKeyboardMarkup(row_width=1)
     
     btn1 = types.InlineKeyboardButton(
-        text='{emoji} Фото расписания на неделю'.format(
+        text='{emoji} JPG|PNG фото расписания на неделю'.format(
             emoji=emoji.emojize(':camera:',
                                 language='alias')),
         callback_data='upload_week_photo')
     
     btn2 = types.InlineKeyboardButton(
-        text='{emoji} Фото расписания на месяц'.format(
+        text='{emoji} PDF файл расписания на месяц'.format(
             emoji=emoji.emojize(':camera:',
                                 language='alias')),
         callback_data='upload_month_photo')
@@ -214,7 +214,7 @@ def IKM_admin_check_hdd(files: list) -> types.InlineKeyboardMarkup:
 
 def IKM_admin_open_menu() -> types.InlineKeyboardMarkup:
     """
-    Клавиатура с кнопкой "Открыть меню" для повторного выбора дня расписания
+    Клавиатура с кнопкой "Открыть меню" для открытия панели управления
     :return:
     """
     ikm_admin_open_menu = types.InlineKeyboardMarkup().add(types.InlineKeyboardButton(text='Открыть меню',
