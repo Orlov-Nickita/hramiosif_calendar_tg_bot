@@ -1,3 +1,4 @@
+import pytz
 import telebot
 import os.path
 import datetime
@@ -98,10 +99,10 @@ def save_photo_month(call: telebot.types.CallbackQuery) -> None:
     
     if call.data == 'this_month' or call.data == 'next_month':
         if call.data == 'this_month':
-            month_digit = int(datetime.datetime.now().strftime("%m"))
+            month_digit = int(datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime("%m"))
         
         if call.data == 'next_month':
-            month_digit = int(datetime.datetime.now().strftime("%m")) + 1
+            month_digit = int(datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime("%m")) + 1
         
         global src
         global downloaded_file
@@ -143,7 +144,7 @@ def save_photo_month(call: telebot.types.CallbackQuery) -> None:
     elif call.data == 'other_month':
         msg = bot.send_message(chat_id=call.message.chat.id,
                                text='Укажите номер месяца в году. Сейчас, например, идет {} месяц'.format(
-                                   int(datetime.datetime.now().strftime("%m"))
+                                   int(datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime("%m"))
                                ))
         
         logger.info('Бот отправил сообщение "{}"'.format(msg.text),

@@ -1,3 +1,4 @@
+import pytz
 import telebot
 import os.path
 import datetime
@@ -103,10 +104,10 @@ def save_photo_week(call: telebot.types.CallbackQuery) -> None:
     
     if call.data == 'this_week' or call.data == 'next_week':
         if call.data == 'this_week':
-            week_digit = int(datetime.datetime.now().strftime("%U"))
+            week_digit = int(datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime("%U"))
         
         if call.data == 'next_week':
-            week_digit = int(datetime.datetime.now().strftime("%U")) + 1
+            week_digit = int(datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime("%U")) + 1
         
         global src
         global downloaded_file
@@ -148,7 +149,7 @@ def save_photo_week(call: telebot.types.CallbackQuery) -> None:
     elif call.data == 'other_week':
         msg = bot.send_message(chat_id=call.message.chat.id,
                                text='Укажите номер недели в году. Сейчас, например, идет {} неделя'.format(
-                                   int(datetime.datetime.now().strftime("%U"))
+                                   int(datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime("%U"))
                                ))
         
         logger.info('Бот отправил сообщение "{}"'.format(msg.text),

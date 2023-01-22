@@ -1,6 +1,7 @@
 import datetime
 import os.path
 
+import pytz
 import telebot
 from telegram import ChatAction, ParseMode
 
@@ -202,13 +203,13 @@ def date_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
     if call.data == 'text_schedule':
         bot.send_chat_action(chat_id=call.message.chat.id, action=ChatAction.TYPING)
         
-        today_digit = datetime.datetime.now().strftime("%d")
-        month_digit = int(datetime.datetime.now().strftime("%m"))
+        today_digit = datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime("%d")
+        month_digit = int(datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime("%m"))
         
         current_date = '{day} {month}'.format(day=today_digit,
                                               month=all_months_in_calendar[month_digit - 1])
         
-        days_till_week_end = 8 - datetime.datetime.now().isoweekday()
+        days_till_week_end = 8 - datetime.datetime.now(pytz.timezone('Europe/Moscow')).isoweekday()
         all_days_in_schedule = [i for i in data_from_json(schedules_excel_dir + json_days_list) if i != '-']
         
         current_day = all_days_in_schedule.index(current_date)
@@ -232,7 +233,7 @@ def date_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
     if call.data == 'file_schedule':
         bot.send_chat_action(chat_id=call.message.chat.id, action=ChatAction.UPLOAD_PHOTO)
         
-        this_week_digit = int(datetime.datetime.now().strftime("%U"))
+        this_week_digit = int(datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime("%U"))
         
         if os.path.exists(schedule_photo_week_dir + week_photo_name.format(number=this_week_digit)):
             bot.send_photo(chat_id=call.message.chat.id,
@@ -296,7 +297,7 @@ def month_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
     
     bot.send_chat_action(chat_id=call.message.chat.id, action=ChatAction.UPLOAD_PHOTO)
     
-    this_month_digit = int(datetime.datetime.now().strftime("%m"))
+    this_month_digit = int(datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime("%m"))
     
     if os.path.exists(schedule_photo_month_dir + month_photo_name.format(number=this_month_digit)):
         bot.send_document(chat_id=call.message.chat.id,

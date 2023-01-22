@@ -1,6 +1,7 @@
 import datetime
 
 import emoji
+import pytz
 from telebot import types
 
 from loader import all_months_in_calendar
@@ -51,8 +52,8 @@ def IKM_date_schedule_choice(days_list: list) -> types.InlineKeyboardMarkup:
     """
     ikm_date_schedule_choice = types.InlineKeyboardMarkup(row_width=2)
     
-    today_digit = datetime.datetime.now().strftime("%d")
-    month_digit = int(datetime.datetime.now().strftime("%m"))
+    today_digit = datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime("%d")
+    month_digit = int(datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime("%m"))
     
     current_date = '{day} {month}'.format(day=today_digit,
                                           month=all_months_in_calendar[month_digit - 1])
