@@ -103,18 +103,20 @@ def open_menu_again_func(call: telebot.types.CallbackQuery) -> None:
     
     if call.data == 'open_menu_again':
         if call.message.chat.id == administrators['Никита']:
-            bot.send_message(chat_id=call.message.chat.id,
-                             text='{emoji} Панель управления {emoji}'.format(
-                                 emoji=emoji.emojize(':open_file_folder:',
-                                                     language='alias')),
-                             reply_markup=IKM_admin_panel_main(),
-                             parse_mode=ParseMode.HTML)
+            bot.edit_message_text(chat_id=call.message.chat.id,
+                                  message_id=call.message.message_id,
+                                  text='{emoji} Панель управления {emoji}'.format(
+                                      emoji=emoji.emojize(':open_file_folder:',
+                                                          language='alias')),
+                                  reply_markup=IKM_admin_panel_main(),
+                                  parse_mode=ParseMode.HTML)
         
         else:
             
-            bot.send_message(chat_id=call.message.chat.id,
-                             text='{emoji} Панель управления {emoji}'.format(
-                                 emoji=emoji.emojize(':open_file_folder:',
-                                                     language='alias')),
-                             reply_markup=IKM_admin_panel_short(),
-                             parse_mode=ParseMode.HTML)
+            bot.edit_message_text(chat_id=call.message.chat.id,
+                                  message_id=call.message.message_id,
+                                  text='{emoji} Панель управления {emoji}'.format(
+                                      emoji=emoji.emojize(':open_file_folder:',
+                                                          language='alias')),
+                                  reply_markup=IKM_admin_panel_short(),
+                                  parse_mode=ParseMode.HTML)

@@ -16,12 +16,13 @@ def RKM_for_the_menu() -> types.ReplyKeyboardMarkup:
         emoji=emoji.emojize(':pray:',
                             language='alias')
     ))
-    button2 = types.KeyboardButton('Посмотреть календарь {emoji}'.format(
-        emoji=emoji.emojize(':clipboard:',
-                            language='alias')
-    ))
+    # button2 = types.KeyboardButton('Посмотреть календарь {emoji}'.format(
+    #     emoji=emoji.emojize(':clipboard:',
+    #                         language='alias')
+    # ))
     
-    rkm_menu.add(button1, button2)
+    # rkm_menu.add(button1, button2)
+    rkm_menu.add(button1)
     
     return rkm_menu
 

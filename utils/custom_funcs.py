@@ -97,15 +97,14 @@ def load_photo_or_doc_from_bot(bot, logger, msg: telebot.types.Message, src: str
         
         elif doc:
             
-            msg_func = bot.send_message(chat_id=msg.chat.id,
-                                        text=bot_text)
-            
             if not os.path.exists(schedules_excel_dir + json_excel_file):
                 data_to_json(json_file=schedules_excel_dir + json_excel_file,
                              data_dict_or_list={})
             if not check_new_file(new_file=schedules_excel_dir + excel_file_name,
-                                  filejson=schedules_excel_dir + json_excel_file):
-                opened_xl = open_to_dict(excel_file=schedules_excel_dir + excel_file_name)
+                                  filejson=schedules_excel_dir + json_excel_file,
+                                  message=msg):
+                opened_xl = open_to_dict(excel_file=schedules_excel_dir + excel_file_name,
+                                         message=msg)
                 data_to_json(json_file=schedules_excel_dir + json_excel_file, data_dict_or_list=opened_xl)
                 
                 list_of_col = to_lists_of_column(data_from_json(schedules_excel_dir + json_excel_file))
@@ -119,6 +118,15 @@ def load_photo_or_doc_from_bot(bot, logger, msg: telebot.types.Message, src: str
                                  json_file=schedules_excel_dir + json_excel_file)))
                 data_to_json(json_file=schedules_excel_dir + json_saints, data_dict_or_list=list_of_col[1])
                 data_to_json(json_file=schedules_excel_dir + json_timing, data_dict_or_list=list_of_col[2])
+                
+                if check_new_file(new_file=schedules_excel_dir + excel_file_name,
+                                  filejson=schedules_excel_dir + json_excel_file,
+                                  message=msg):
+                    msg_func = bot.send_message(chat_id=msg.chat.id,
+                                                text=bot_text)
+                else:
+                    msg_func = bot.send_message(chat_id=msg.chat.id,
+                                                text='Произошла ошибка')
         
         elif other_week:
             msg_func = bot.send_message(chat_id=msg.chat.id,

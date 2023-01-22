@@ -209,7 +209,7 @@ def date_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
                                               month=all_months_in_calendar[month_digit - 1])
         
         days_till_week_end = 8 - datetime.datetime.now().isoweekday()
-        all_days_in_schedule = [i for i in data_from_json(schedules_excel_dir + 'days_list.json') if i != '-']
+        all_days_in_schedule = [i for i in data_from_json(schedules_excel_dir + json_days_list) if i != '-']
         
         current_day = all_days_in_schedule.index(current_date)
         
@@ -334,7 +334,7 @@ def date_open_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
                 user_id=call.message.chat.id)
     
     if 'На какой день Вы хотели посмотреть расписание?' in call.message.text:
-        all_days_in_schedule = [i for i in data_from_json(schedules_excel_dir + 'days_list.json') if i != '-']
+        all_days_in_schedule = [i for i in data_from_json(schedules_excel_dir + json_days_list) if i != '-']
         
         msg = bot.edit_message_text(text='На какой день Вы хотели посмотреть расписание?',
                                     chat_id=call.message.chat.id,

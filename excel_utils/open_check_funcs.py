@@ -1,7 +1,8 @@
 import json
 import pandas as pd
+import telebot
 
-from loader import all_months_in_calendar
+from loader import all_months_in_calendar, bot
 
 
 def remove_timestamp_from_dataframe(dt):
@@ -15,7 +16,7 @@ def remove_timestamp_from_dataframe(dt):
         return '-'
 
 
-def open_to_dict(excel_file: str) -> dict:
+def open_to_dict(excel_file: str, message: telebot.types.Message) -> dict:
     """
     Функция открывает файл Excel, убирает все пустые строчки и Timestamp, затем из DataFrame переделывает в словарь
     "Название столбца": {"Индекс (номер строки)": "Текст ячейки"}
@@ -24,8 +25,18 @@ def open_to_dict(excel_file: str) -> dict:
     new_ex_f = pd.read_excel(excel_file)
     data_from_excel = pd.DataFrame(new_ex_f)
     data_from_excel.replace({pd.NaT: '-'}, inplace=True)
-    data_from_excel['Дата'] = data_from_excel['Дата'].apply(remove_timestamp_from_dataframe)
-    return data_from_excel.to_dict()
+    
+    try:
+        data_from_excel['Дата'] = data_from_excel['Дата'].apply(remove_timestamp_from_dataframe)
+        
+    except AttributeError:
+        bot.send_message(chat_id=message.chat.id,
+                         text='Произошла ошибка прочтения файла. Скорее всего некорректно внесена дата '
+                              'в ячейки')
+        exit()
+        
+    else:
+        return data_from_excel.to_dict()
 
 
 def data_to_json(json_file: str, data_dict_or_list: dict or list) -> None:
@@ -93,10 +104,10 @@ def to_lists_of_column(excel_dict: dict) -> tuple:
     return date_col, saint_col, sch_col
 
 
-def check_new_file(new_file: str, filejson: str) -> bool:
+def check_new_file(new_file: str, filejson: str, message: telebot.types.Message) -> bool:
     """
     Функция проверки нового загружаемого файла Excel и текущего записанного JSON файла
     param new_file: Новый файл Excel
     param filejson: Текущий файл с информацией JSON
     """
-    return open_to_dict(new_file) == str_to_int_key(data_from_json(filejson))
+    return open_to_dict(new_file, message) == str_to_int_key(data_from_json(filejson))

@@ -2,7 +2,7 @@ import telebot.types
 from telegram import ParseMode
 
 from christian_calendar import send_information
-from commands import t_schedule, c_start, c_help, c_keyboard, admin_panel
+from commands import c_start, c_help, c_keyboard, admin_panel, t_schedule
 from loader import bot, administrators
 from utils.logger import logger
 
@@ -57,7 +57,7 @@ def keyboard_open(message: telebot.types.Message) -> None:
     c_keyboard.start(message)
 
 
-@bot.message_handler(commands=['admin'])
+@bot.message_handler(commands=['admin', 'Admin'])
 def admin_panel_func(message: telebot.types.Message) -> None:
     """
     Открывает панель управления для администраторов
@@ -109,8 +109,8 @@ def text_func(message: telebot.types.Message):
     if message.text.startswith('Уточнить расписание богослужений'):
         t_schedule.start(message)
     
-    elif message.text.startswith('Посмотреть календарь'):
-        send_information.start(message)
+    # elif message.text.startswith('Посмотреть календарь'):
+    #     send_information.start(message)
     
     else:
         bot.send_message(chat_id=message.chat.id,
