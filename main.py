@@ -1,3 +1,7 @@
+"""
+Модуль отвечающий за запуск программы. Пусковой файл
+"""
+
 import os.path
 
 from loader import log_dir, schedules_main_dir, users_sql_dir, users_sql_file_name
@@ -36,5 +40,13 @@ if __name__ == '__main__':
             Фамилия TEXT,
             Никнейм TEXT
             )""")
-
+        cursor.execute(""" CREATE TABLE IF NOT EXISTS admin_hdd_roots (
+            Пользователь INTEGER,
+            Имя TEXT,
+            Фамилия TEXT,
+            Никнейм TEXT,
+            Путь TEXT,
+            Корень TEXT
+            )""")
+        
     bot.infinity_polling()

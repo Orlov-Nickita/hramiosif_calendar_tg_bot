@@ -1,3 +1,7 @@
+"""
+Модуль обработки админ команды на загрузку недельного расписания
+"""
+
 import pytz
 import telebot
 import os.path
@@ -44,7 +48,7 @@ def photo_week(message: telebot.types.Message) -> None:
     logger.info('Запущена функция photo_week пользователь отправил в бот файл',
                 username=message.chat.username,
                 user_id=message.chat.id)
-
+    
     global file_info
     try:
         if not os.path.exists(schedule_photo_week_dir):
@@ -56,15 +60,15 @@ def photo_week(message: telebot.types.Message) -> None:
                         user_id=message.chat.id)
             
             file_info = bot.get_file(message.photo[-1].file_id)
-            
+        
         elif message.document and 'image' in message.document.mime_type:
-
+            
             logger.info('Пользователь прислал файл. Тип файла {}'.format(message.document.mime_type),
                         username=message.chat.username,
                         user_id=message.chat.id)
             
             file_info = bot.get_file(message.document.file_id)
-            
+        
         else:
             raise FileError
         
@@ -77,7 +81,7 @@ def photo_week(message: telebot.types.Message) -> None:
                      user_id=message.chat.id)
         bot.send_message(chat_id=message.chat.id,
                          text='Ошибка. Нужно фото. Повторите отправку')
-
+    
     else:
         msg = bot.send_message(text='На какую неделю это расписание?',
                                chat_id=message.chat.id,
@@ -85,6 +89,7 @@ def photo_week(message: telebot.types.Message) -> None:
         
         logger.info('Бот отправил сообщение "{}"'.format(msg.text),
                     user_id=message.chat.id)
+
 
 @bot.callback_query_handler(
     func=lambda call: call.data in ['this_week', 'next_week', 'other_week']
@@ -214,7 +219,7 @@ def download_photo_week(message: telebot.types.Message) -> None:
 
 @bot.callback_query_handler(
     func=lambda call: (call.data == 'yes_overwrite'
-                      or call.data == 'no_overwrite')
+                       or call.data == 'no_overwrite')
                       and 'Файл с расписанием на указанную неделю уже есть. Перезаписать?' in call.message.text)
 def overwrite_week(call: telebot.types.CallbackQuery) -> None:
     """
@@ -257,8 +262,8 @@ def overwrite_week(call: telebot.types.CallbackQuery) -> None:
 
 
 @bot.callback_query_handler(
-    func=lambda call: call.data == 'yes_overwrite_final'
-                      or call.data == 'no_overwrite_final'
+    func=lambda call: (call.data == 'yes_overwrite_final'
+                       or call.data == 'no_overwrite_final')
                       and call.message.content_type == 'photo')
 def overwrite_week_2(call: telebot.types.CallbackQuery) -> None:
     """
@@ -287,6 +292,7 @@ def overwrite_week_2(call: telebot.types.CallbackQuery) -> None:
         
         bot.send_message(chat_id=call.message.chat.id,
                          text='Файл не перезаписан, операция отменена')
+
 
 @bot.callback_query_handler(
     func=lambda call: call.message.content_type != 'photo'

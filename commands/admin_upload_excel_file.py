@@ -1,3 +1,7 @@
+"""
+Модуль обработки админ команды на загрузку Excel файла
+"""
+
 import telebot
 import os.path
 
@@ -49,10 +53,10 @@ def upload_excel_file_func(message: telebot.types.Message) -> None:
                      format(message),
                      username=message.chat.username,
                      user_id=message.chat.id)
-    
+        
         msg = bot.send_message(chat_id=message.chat.id,
                                text='Ошибка. Нужен файл. Повторите отправку')
-    
+        
         logger.info('Бот отправил сообщение "{}"'.format(msg.text),
                     user_id=message.chat.id)
     
@@ -100,8 +104,8 @@ def upload_excel_file_func(message: telebot.types.Message) -> None:
 
 @bot.callback_query_handler(
     func=lambda call: call.data == 'yes_overwrite_excel'
-                      or call.data == 'no_leave_excel'
-                      and 'Excel уже есть. Перезаписать?' in call.message.text)
+or call.data == 'no_leave_excel'
+and 'Excel уже есть. Перезаписать?' in call.message.text)
 def overwrite_excel_func(call: telebot.types.CallbackQuery) -> None:
     """
     Функция для перезаписи файла Excel

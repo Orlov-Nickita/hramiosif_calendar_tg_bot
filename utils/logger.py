@@ -1,6 +1,7 @@
-# import datetime
+"""
+Модуль отвечающий за настройку логгера
+"""
 import logging
-
 from loader import log_dir, log_file_name
 
 
@@ -24,8 +25,6 @@ class CustomAdapter(logging.LoggerAdapter):
         """
         
         username = user_dict_info.pop('username', self.extra['username'])
-        # first_name = user_dict_info.pop('username', self.extra['firstname'])
-        # last_name = user_dict_info.pop('username', self.extra['lastname'])
         user_id = user_dict_info.pop('user_id', self.extra['user_id'])
         
         return '[username %s] - ' \
@@ -33,11 +32,6 @@ class CustomAdapter(logging.LoggerAdapter):
                '[%s]' % (username, user_id, log_message), user_dict_info
 
 
-# logging.basicConfig(filename='./hdd/logs/{year}-{month}-{day} bot_detail.log'.format(
-#     year=datetime.datetime.now().strftime("%Y"),
-#     month=datetime.datetime.now().strftime("%m"),
-#     day=datetime.datetime.now().strftime("%d")
-# ),
 logging.basicConfig(filename=log_dir + log_file_name,
                     level=logging.INFO,
                     encoding='utf-8',

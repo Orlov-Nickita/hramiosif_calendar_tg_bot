@@ -1,3 +1,7 @@
+"""
+Модуль с клавиатурами для панели управления со стороны администраторов
+"""
+
 import emoji
 from telebot import types
 
@@ -17,7 +21,7 @@ def IKM_admin_panel_short() -> types.InlineKeyboardMarkup:
     
     btn2 = types.InlineKeyboardButton(
         text='{emoji} PDF файл расписания на месяц'.format(
-            emoji=emoji.emojize(':camera:',
+            emoji=emoji.emojize(':scroll:',
                                 language='alias')),
         callback_data='upload_month_photo')
     
@@ -33,7 +37,13 @@ def IKM_admin_panel_short() -> types.InlineKeyboardMarkup:
                                 language='alias')),
         callback_data='followers')
     
-    ikm_admin_panel_short.add(btn1, btn2, btn3, btn4)
+    btn5 = types.InlineKeyboardButton(
+        text='{emoji} Посмотреть жесткий диск'.format(
+            emoji=emoji.emojize(':floppy_disk:',
+                                language='alias')),
+        callback_data='hdd_check')
+    
+    ikm_admin_panel_short.add(btn1, btn2, btn3, btn4, btn5)
     
     return ikm_admin_panel_short
 
@@ -53,7 +63,7 @@ def IKM_admin_panel_main() -> types.InlineKeyboardMarkup:
     
     btn2 = types.InlineKeyboardButton(
         text='{emoji} PDF файл расписания на месяц'.format(
-            emoji=emoji.emojize(':camera:',
+            emoji=emoji.emojize(':scroll:',
                                 language='alias')),
         callback_data='upload_month_photo')
     
@@ -99,8 +109,15 @@ def IKM_admin_panel_main() -> types.InlineKeyboardMarkup:
                                 language='alias')),
         callback_data='send_update_message')
     
+    btn10 = types.InlineKeyboardButton(
+        text='{emoji} Посмотреть жесткий диск'.format(
+            emoji=emoji.emojize(':floppy_disk:',
+                                language='alias')),
+        callback_data='hdd_check')
+    
     ikm_admin_panel_main.add(btn1, btn2, btn3, btn4,
-                             btn5, btn6, btn7, btn8, btn9)
+                             btn5, btn6, btn7, btn8,
+                             btn9, btn10)
     
     return ikm_admin_panel_main
 
@@ -169,7 +186,7 @@ def IKM_admin_overwrite_file_first_choice() -> types.InlineKeyboardMarkup:
 
 def IKM_admin_overwrite_file_second_choice() -> types.InlineKeyboardMarkup:
     """
-    Клаивиатура с возможностью перезаписать или оставить имеющийся файл.
+    Клавиатура с возможностью перезаписать или оставить имеющийся файл.
     :return: Возвращается клавиатура.
     """
     ikm_admin_overwrite_file_second_choice = types.InlineKeyboardMarkup(row_width=1)
@@ -184,7 +201,7 @@ def IKM_admin_overwrite_file_second_choice() -> types.InlineKeyboardMarkup:
 
 def IKM_admin_overwrite_excel_file() -> types.InlineKeyboardMarkup:
     """
-    Клаиватура с возможностью перезаписать или сотавить имеющийся файл Excel.
+    Клавиатура с возможностью перезаписать или оставить имеющийся файл Excel.
     :return: Возвращается клавиатура.
     """
     ikm_admin_overwrite_excel_file = types.InlineKeyboardMarkup(row_width=1)
@@ -205,11 +222,84 @@ def IKM_admin_check_hdd(files: list) -> types.InlineKeyboardMarkup:
     ikm_admin_check_hdd = types.InlineKeyboardMarkup(row_width=1)
     
     for file in files:
-        ikm_admin_check_hdd.add(types.InlineKeyboardButton(text=file,
-                                                           callback_data=file)
-                                )
+        if file[0] == 'Папка':
+            ikm_admin_check_hdd.add(types.InlineKeyboardButton(
+                text='{} {} {}'.format(emoji.emojize(':file_folder:', language='alias'),
+                                       file[0],
+                                       file[1]),
+                callback_data=file[1])
+            )
+        
+        if file[0] == 'Файл':
+            ikm_admin_check_hdd.add(types.InlineKeyboardButton(
+                text='{} {} {}'.format(emoji.emojize(':book:', language='alias'),
+                                       file[0],
+                                       file[1]),
+                callback_data=file[1])
+            )
+    
+    ikm_admin_check_hdd.add(types.InlineKeyboardButton(text='{emoji} Вернуться назад {emoji}'.format(
+        emoji=emoji.emojize(':back:',
+                            language='alias')),
+        callback_data='return_dir_back'))
+    
+    ikm_admin_check_hdd.add(types.InlineKeyboardButton(text='{emoji} Закрыть меню {emoji}'.format(
+        emoji=emoji.emojize(':x:',
+                            language='alias')),
+        callback_data='close_hdd'))
     
     return ikm_admin_check_hdd
+
+
+def IKM_open_or_not_files_in_dir_hdd() -> types.InlineKeyboardMarkup:
+    """
+    Меню управления для выбора действий с файлом
+    """
+    ikm_open_or_not_files_in_dir_hdd = types.InlineKeyboardMarkup(row_width=2)
+    
+    btn1 = types.InlineKeyboardButton(text='Посмотреть', callback_data='yes_open_hdd_file')
+    btn2 = types.InlineKeyboardButton(text='Назад', callback_data='no_open_hdd_file')
+    btn3 = types.InlineKeyboardButton(text='Удалить файл', callback_data='remove_hdd_file')
+    
+    ikm_open_or_not_files_in_dir_hdd.add(btn1, btn2, btn3)
+    
+    return ikm_open_or_not_files_in_dir_hdd
+
+
+def IKM_open_or_not_for_photo_in_dir_hdd() -> types.InlineKeyboardMarkup:
+    """
+    Меню управления для выбора действий с фотографией, потому что фотография открывается в предпросмотр, а
+    файл можно только принудительно вызвать
+    """
+    ikm_open_or_not_for_photo_in_dir_hdd = types.InlineKeyboardMarkup(row_width=2)
+    
+    btn1 = types.InlineKeyboardButton(text='Назад', callback_data='return_for_photo_in_dir_hdd')
+    btn2 = types.InlineKeyboardButton(text='Удалить', callback_data='remove_for_photo_in_dir_hdd')
+    
+    ikm_open_or_not_for_photo_in_dir_hdd.add(btn1, btn2)
+    
+    return ikm_open_or_not_for_photo_in_dir_hdd
+
+
+def IKM_admin_in_dir_hdd_remove_conf() -> types.InlineKeyboardMarkup:
+    """
+    Подтверждение очистки лог файла.
+    :return: Клавиатура (функция) как объект.
+    :rtype: telegram.InlineKeyboardMarkup
+    """
+    ikm_admin_in_dir_hdd_remove_conf = types.InlineKeyboardMarkup(row_width=2)
+    
+    item1 = types.InlineKeyboardButton(
+        text='Удалить',
+        callback_data='yes_remove_hdd_file')
+    
+    item2 = types.InlineKeyboardButton(
+        text='Нет',
+        callback_data='no_remove_hdd_file')
+    
+    ikm_admin_in_dir_hdd_remove_conf.add(item1, item2)
+    
+    return ikm_admin_in_dir_hdd_remove_conf
 
 
 def IKM_admin_open_menu() -> types.InlineKeyboardMarkup:
@@ -232,7 +322,7 @@ def IKM_admin_log_remove_conf() -> types.InlineKeyboardMarkup:
     ikm_admin_log_remove_conf = types.InlineKeyboardMarkup(row_width=2)
     
     item1 = types.InlineKeyboardButton(
-        text='Да',
+        text='Удалить',
         callback_data='yes_remove_log')
     
     item2 = types.InlineKeyboardButton(
@@ -267,7 +357,7 @@ def IKM_admin_update_send_conf() -> types.InlineKeyboardMarkup:
 
 def IKM_admin_errors_log_send() -> types.InlineKeyboardMarkup:
     """
-    Подтверждение отправки ошибок из лог файла.
+    Подтверждение отправки ошибок из лог-файла.
     :return: Клавиатура (функция) как объект.
     :rtype: telegram.InlineKeyboardMarkup
     """

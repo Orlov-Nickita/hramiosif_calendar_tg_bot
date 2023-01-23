@@ -1,3 +1,7 @@
+"""
+Модуль обработки админ команды на загрузку месячного расписания
+"""
+
 import pytz
 import telebot
 import os.path
@@ -8,7 +12,7 @@ from errors import FileError
 from keyboards_for_bot.admin_keyboards import IKM_admin_save_photo_again, \
     IKM_admin_month_save_photo, IKM_admin_overwrite_file_first_choice, \
     IKM_admin_overwrite_file_second_choice
-from loader import bot, schedule_photo_month_dir, month_photo_name
+from loader import bot, schedule_photo_month_dir, month_photo_name, all_months_in_calendar_for_save
 from utils.logger import logger
 from utils.custom_funcs import button_text, load_photo_or_doc_from_bot
 
@@ -104,12 +108,16 @@ def save_photo_month(call: telebot.types.CallbackQuery) -> None:
         if call.data == 'next_month':
             month_digit = int(datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime("%m")) + 1
         
+        current_month = all_months_in_calendar_for_save[month_digit - 1]
+        year_digit = int(datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime("%Y"))
+
         global src
         global downloaded_file
         
         try:
             downloaded_file = bot.download_file(file_info.file_path)
-            file_info.file_path = month_photo_name.format(number=month_digit)
+            file_info.file_path = month_photo_name.format(month=current_month,
+                                                          year=year_digit)
             
             src = schedule_photo_month_dir + file_info.file_path
         
@@ -167,9 +175,13 @@ def download_photo_month(message: telebot.types.Message) -> None:
         global src
         global downloaded_file
         
+        current_month = all_months_in_calendar_for_save[message.text - 1]
+        year_digit = int(datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime("%Y"))
+
         try:
             downloaded_file = bot.download_file(file_info.file_path)
-            file_info.file_path = month_photo_name.format(number=message.text)
+            file_info.file_path = month_photo_name.format(month=current_month,
+                                                          year=year_digit)
             
             src = schedule_photo_month_dir + file_info.file_path
         

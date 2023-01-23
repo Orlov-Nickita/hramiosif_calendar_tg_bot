@@ -1,3 +1,7 @@
+"""
+Модуль обработки команды keyboard
+"""
+
 import telebot
 from loader import bot
 from utils.logger import logger

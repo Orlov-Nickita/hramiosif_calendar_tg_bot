@@ -1,8 +1,12 @@
+"""
+Модуль обработки админ команды на работу с базой данных
+"""
+
 import telebot
 from telegram import ChatAction, ParseMode
 from loader import bot, users_sql_dir, users_sql_file_name
 from utils.logger import logger
-from utils.sql_funcs import get_info_from_sql
+from utils.sql_funcs import get_info_from_sql_for_followers
 
 
 def upload_sql(message: telebot.types.Message) -> None:
@@ -29,8 +33,8 @@ def followers_func(message: telebot.types.Message) -> None:
     
     param message: Сообщение
     """
-    qty_flw = len(get_info_from_sql(sql_base=users_sql_dir + users_sql_file_name,
-                                    message=message))
+    qty_flw = len(get_info_from_sql_for_followers(sql_base=users_sql_dir + users_sql_file_name,
+                                                  message=message))
     
     bot.send_message(chat_id=message.chat.id,
                      text='Число пользователей в боте : <b>{}</b>'.format(qty_flw),
@@ -38,3 +42,4 @@ def followers_func(message: telebot.types.Message) -> None:
     
     logger.info('Бот отправил сообщение\n"{}"'.format(message.text),
                 user_id=message.chat.id)
+

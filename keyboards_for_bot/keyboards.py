@@ -1,3 +1,7 @@
+"""
+Модуль с пользовательскими клавиатурами
+"""
+
 import datetime
 
 import emoji
@@ -35,9 +39,9 @@ def IKM_schedule_option() -> types.InlineKeyboardMarkup:
     """
     ikm_schedule_option = types.InlineKeyboardMarkup(row_width=2)
     
-    btn1 = types.InlineKeyboardButton(text='В конкретный день', callback_data='day')
-    btn2 = types.InlineKeyboardButton(text='На эту неделю', callback_data='week')
-    btn3 = types.InlineKeyboardButton(text='На весь месяц', callback_data='month')
+    btn1 = types.InlineKeyboardButton(text='На конкретный день', callback_data='day')
+    btn2 = types.InlineKeyboardButton(text='На текущую неделю', callback_data='week')
+    btn3 = types.InlineKeyboardButton(text='На текущий месяц', callback_data='month')
     
     ikm_schedule_option.add(btn1, btn2, btn3)
     

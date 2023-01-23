@@ -1,3 +1,7 @@
+"""
+Модуль хранящий класс Photo_album
+"""
+
 from typing import List
 
 
@@ -12,12 +16,21 @@ class Photo_album:
         self.i_list = mylist
     
     def next(self) -> List:
+        """
+        Срезает список так, чтобы при печати объекта класса, выводился следующий элемент
+        """
         self.i_list = self.i_list[1:] + self.i_list[:1]
         return self.i_list[0]
     
     def prev(self) -> List:
+        """
+        Срезает список так, чтобы при печати объекта класса, выводился предыдущий элемент
+        """
         self.i_list = self.i_list[-1:] + self.i_list[:-1]
         return self.i_list[0]
     
     def show(self):
+        """
+        Метод для вывода текущего элемента в печать
+        """
         return self.i_list[0]

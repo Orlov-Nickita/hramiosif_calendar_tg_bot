@@ -1,4 +1,6 @@
-import time
+"""
+Модуль обработки команды start
+"""
 
 import telebot
 import emoji
@@ -20,14 +22,11 @@ def start(message: telebot.types.Message) -> None:
                 user_id=message.chat.id)
     
     msg = bot.send_message(chat_id=message.chat.id,
-                           text='Чат-бот храма на Развилке {emoji1}\n'
-                                'Я помогу уточнить расписание {emoji2} богослужений храма на конкретный день, '
-                                'неделю или месяц\n'
+                           text='Приветствую Вас!\n'
+                                'Выберите пункт меню для продолжения\n'
                                 '\n'
                                 'Если возникнет необходимость обратиться за помощью в '
-                                'поддержку, нажмите тут /help или выберите соответствующий пункт меню внизу'.format(
-                               emoji1=emoji.emojize(':church:', language='alias'),
-                               emoji2=emoji.emojize(':book:', language='alias')),
+                                'поддержку, нажмите тут /help или выберите соответствующий пункт меню внизу',
                            reply_markup=RKM_for_the_menu())
     
     data_add(sql_base=users_sql_dir + users_sql_file_name,

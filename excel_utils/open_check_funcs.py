@@ -1,3 +1,8 @@
+"""
+Модуль с функциями для работы с Excel файлом и для записи данных в JSON
+"""
+
+
 import json
 import pandas as pd
 import telebot
@@ -41,7 +46,7 @@ def open_to_dict(excel_file: str, message: telebot.types.Message) -> dict:
 
 def data_to_json(json_file: str, data_dict_or_list: dict or list) -> None:
     """
-    Функция зиписи информации из словаря или списка в файл в формате JSON
+    Функция записи информации из словаря или списка в файл в формате JSON
     param json_file: Имя или путь+имя файла куда будет запись
     param data_dict_or_list: Словарь / список
     """

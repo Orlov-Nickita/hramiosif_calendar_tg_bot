@@ -1,3 +1,7 @@
+"""
+Модуль для обработки команды на отправку расписания
+"""
+
 import datetime
 import os.path
 
@@ -9,7 +13,7 @@ from excel_utils.open_check_funcs import data_from_json
 from excel_utils.parsing_funcs import schedule_for_a_specific_day, schedule_for_some_days
 from loader import bot, all_months_in_calendar, \
     schedules_excel_dir, json_days_list, schedule_photo_week_dir, week_photo_name, month_photo_name, \
-    schedule_photo_month_dir
+    schedule_photo_month_dir, all_months_in_calendar_for_save
 from utils.logger import logger
 from keyboards_for_bot.keyboards import IKM_schedule_option, IKM_date_schedule_choice, IKM_open_schedule, \
     IKM_week_schedule_choice
@@ -299,12 +303,17 @@ def month_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
     
     this_month_digit = int(datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime("%m"))
     
-    if os.path.exists(schedule_photo_month_dir + month_photo_name.format(number=this_month_digit)):
+    current_month = all_months_in_calendar_for_save[this_month_digit - 1]
+    year_digit = int(datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime("%Y"))
+    
+    if os.path.exists(schedule_photo_month_dir + month_photo_name.format(month=current_month,
+                                                                         year=year_digit)):
         bot.send_document(chat_id=call.message.chat.id,
-                          document=open(schedule_photo_month_dir + month_photo_name.format(number=this_month_digit),
+                          document=open(schedule_photo_month_dir + month_photo_name.format(month=current_month,
+                                                                                           year=year_digit),
                                         'rb'))
         
-        logger.info('Бот отправил фото month_{}.pdf'.format(this_month_digit),
+        logger.info('Бот отправил файл {}.pdf'.format(current_month),
                     user_id=call.message.chat.id)
     
     else:

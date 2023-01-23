@@ -1,3 +1,6 @@
+"""
+Модуль с функциями для работы с текстом HTML
+"""
 from html.parser import HTMLParser
 
 class HTMLFilter(HTMLParser):
@@ -7,6 +10,9 @@ class HTMLFilter(HTMLParser):
     text = ""
     
     def handle_data(self, data):
+        """
+        Метод для формирования текста
+        """
         self.text += data
 
 
@@ -17,4 +23,3 @@ def html_to_text_parser(text: str) -> str:
     temp = HTMLFilter()
     temp.feed(text)
     return temp.text
-

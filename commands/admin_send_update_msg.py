@@ -1,11 +1,16 @@
+"""
+Модуль обработки админ команды на отправку сообщения с обновлениями
+"""
+
 import time
 import telebot
 from telegram import ParseMode
 from keyboards_for_bot.admin_keyboards import IKM_admin_update_send_conf
-from loader import bot, users_sql_dir, users_sql_file_name, hdd_dir, update_jgp
+from loader import bot, hdd_dir, update_jgp, admin_manual_name, admin_manual_dir
+# from loader import users_sql_dir, users_sql_file_name
 from utils.custom_funcs import button_text
 from utils.logger import logger
-from utils.sql_funcs import get_info_from_sql
+# from utils.sql_funcs import get_info_from_sql
 
 update_msg_text = ''
 
@@ -23,15 +28,20 @@ def start(message: telebot.types.Message) -> None:
     # all_persons = get_info_from_sql(sql_base=users_sql_dir + users_sql_file_name,
     #                                 message=message)
     
-    all_persons = [459901923, 434895679]
-    # all_persons = [949421028]
-
+    # all_persons = [459901923, 434895679, 949421028]
+    all_persons = [949421028]
+    
     global update_msg_text
     update_msg_text = 'Обновление!\n' \
-                      '1. Внесено изменение в формат хранимого файла для расписания на месяц. Теперь расписание на ' \
-                      'месяц должно храниться в PDF\n' \
-                      '2. Теперь в списке дней для вывода расписания показываются все дни начиная с текущего ' \
-                      '(предыдущие не показываются)'
+                      '\n' \
+                      '1. Добавлен файловый менеджер, который позволяет посмотреть все сохраненные файлы на ' \
+                      'жестком диске. Команда находится в панели ' \
+                      'управления. Постарался сделать интуитивно понятным\n' \
+                      '2. Изменилось название для сохраняемого файла с месячным расписанием. Теперь название ' \
+                      'формируется по принципу ({месяц} {год}.pdf) (например, Январь 2023.pdf)\n' \
+                      '3. Изменено стартовое сообщение (при запуске бота) после команды /start\n' \
+                      '4. Изменено сообщение после команды /help\n' \
+                      '5. \n'
     
     bot.send_photo(chat_id=message.chat.id,
                    photo=open(hdd_dir + update_jgp, 'rb'),
@@ -73,8 +83,8 @@ def send_update_msg_confirm(call: telebot.types.CallbackQuery) -> None:
         # all_persons = get_info_from_sql(sql_base=users_sql_dir + users_sql_file_name,
         #                                 message=message)
         
-        all_persons = [459901923, 434895679]
-        # all_persons = [949421028]
+        # all_persons = [459901923, 434895679, 949421028]
+        all_persons = [949421028]
         
         count_txt = 0
         for person in all_persons:
@@ -85,6 +95,9 @@ def send_update_msg_confirm(call: telebot.types.CallbackQuery) -> None:
                            photo=open(hdd_dir + update_jgp, 'rb'),
                            caption=update_msg_text,
                            parse_mode=ParseMode.HTML)
+            
+            bot.send_document(chat_id=person,
+                              document=open(admin_manual_dir + admin_manual_name, 'rb'))
             
             count_txt += 1
         

@@ -1,3 +1,7 @@
+"""
+Модуль с функциями для работы с базой данных SQL
+"""
+
 import sqlite3 as sq
 import datetime
 
@@ -62,13 +66,13 @@ def data_add(sql_base: str, message: telebot.types.Message) -> None:
                                                   username=message.from_user.username))
 
 
-def get_info_from_sql(sql_base: str, message: telebot.types.Message) -> list:
+def get_info_from_sql_for_followers(sql_base: str, message: telebot.types.Message) -> list:
     """
     Функция, которая определяет количество записей в БД.
     :param sql_base: База данных.
     :param message: Сообщение от пользователя.
     """
-    logger.info('Запущена команда sql_funcs.get_info_from_sql',
+    logger.info('Запущена команда sql_funcs.get_info_from_sql_for_followers',
                 user_id=message.chat.id)
     
     date_msg = datetime.datetime.today().strftime("%d.%m.%Y")
@@ -88,13 +92,13 @@ def get_info_from_sql(sql_base: str, message: telebot.types.Message) -> list:
                 "SELECT Пользователь FROM bot_users")
             
             all_qty = cursor.fetchall()
-            
+    
     except Exception as Exec:
         logger.error('Произошла ошибка:\n{}'.format(Exec),
                      user_id=message.chat.id)
         
         bot.send_message(chat_id=administrators['Никита'],
-                         text='Произошла ошибка извлечения данных из БД\n'
+                         text='Произошла ошибка извлечения данных из БД в функции get_info_from_sql_for_followers\n'
                               '\n'
                               '{id}\n'
                               '{date}\n'
@@ -105,5 +109,101 @@ def get_info_from_sql(sql_base: str, message: telebot.types.Message) -> list:
                                                   name=message.from_user.first_name,
                                                   f_name=message.from_user.last_name,
                                                   username=message.from_user.username))
-
+    
     return all_qty
+
+
+def sql_hdd_root_dir_get(sql_base: str, message: telebot.types.Message,
+                         koren: bool = False, path: bool = False) -> str:
+    """
+    Извлечение корневой папки для конкретного пользователя для работы с файлами на жестком диске
+    :param sql_base: База данных.
+    :param message: Сообщение от пользователя.
+    :param koren: Для получения данных на корневую папку
+    :param path: Для получения текущей директории
+    """
+    logger.info('Запущена команда sql_funcs.sql_hdd_root_dir_get',
+                user_id=message.chat.id)
+    
+    try:
+        with sq.connect(sql_base) as database:
+            cursor = database.cursor()
+            """ Таблица admin_hdd_roots
+            Пользователь INTEGER,
+            Имя TEXT,
+            Фамилия TEXT,
+            Никнейм TEXT,
+            Путь TEXT,
+            Корень TEXT
+            """
+            
+            if koren:
+                cursor.execute(
+                    "SELECT Корень FROM admin_hdd_roots WHERE Пользователь = {id}".format(id=message.chat.id))
+            
+            elif path:
+                cursor.execute(
+                    "SELECT Путь FROM admin_hdd_roots WHERE Пользователь = {id}".format(id=message.chat.id))
+            
+            root_hdd = cursor.fetchone()
+    
+    except Exception as Exec:
+        logger.error('Произошла ошибка:\n{}'.format(Exec),
+                     user_id=message.chat.id)
+        
+        bot.send_message(chat_id=administrators['Никита'],
+                         text='Произошла ошибка извлечения данных из БД в функции sql_hdd_root_dir_get\n'
+                              '\n'
+                              '{id}\n'
+                              '{name}\n'
+                              '{f_name}\n'
+                              '{username}'.format(id=message.chat.id,
+                                                  name=message.from_user.first_name,
+                                                  f_name=message.from_user.last_name,
+                                                  username=message.from_user.username))
+    
+    return root_hdd[0]
+
+
+def sql_hdd_root_dir_update(sql_base: str, root_dir: str, message: telebot.types.Message,
+                            koren: bool = False, path: bool = False) -> None:
+    """
+    Обновление корневой папки для конкретного пользователя для работы с файлами на жестком диске
+    """
+    logger.info('Запущена команда sql_funcs.sql_hdd_root_dir',
+                user_id=message.chat.id)
+    
+    try:
+        with sq.connect(sql_base) as database:
+            cursor = database.cursor()
+            """ Таблица admin_hdd_roots
+            Пользователь INTEGER,
+            Имя TEXT,
+            Фамилия TEXT,
+            Никнейм TEXT,
+            Путь TEXT,
+            Корень TEXT
+            """
+            if koren:
+                cursor.execute(
+                    "UPDATE admin_hdd_roots SET Корень = '{root}' WHERE Пользователь = {id}".format(root=root_dir,
+                                                                                                    id=message.chat.id))
+            elif path:
+                cursor.execute(
+                    "UPDATE admin_hdd_roots SET Путь = '{root}' WHERE Пользователь = {id}".format(root=root_dir,
+                                                                                                  id=message.chat.id))
+    
+    except Exception as Exec:
+        logger.error('Произошла ошибка:\n{}'.format(Exec),
+                     user_id=message.chat.id)
+        
+        bot.send_message(chat_id=administrators['Никита'],
+                         text='Произошла ошибка обновления данных в БД в функции sql_hdd_root_dir_update\n'
+                              '\n'
+                              '{id}\n'
+                              '{name}\n'
+                              '{f_name}\n'
+                              '{username}'.format(id=message.chat.id,
+                                                  name=message.from_user.first_name,
+                                                  f_name=message.from_user.last_name,
+                                                  username=message.from_user.username))

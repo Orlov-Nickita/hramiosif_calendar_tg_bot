@@ -1,3 +1,7 @@
+"""
+Модуль с функциями для обработки информации из файлов, полученных после распаковки файла Excel
+"""
+
 from excel_utils.open_check_funcs import data_from_json
 from loader import schedules_excel_dir, json_days_list, json_saints, json_timing, \
     json_days_with_index, json_days_with_lines

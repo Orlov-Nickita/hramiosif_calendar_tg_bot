@@ -1,10 +1,14 @@
+"""
+Модуль с кастомными функциями для работы других модулей
+"""
+
 import os.path
 from typing import List
 from telebot import types
 import telebot
 
-from excel_utils.open_check_funcs import check_new_file, open_to_dict, data_to_json, to_lists_of_column, data_from_json, \
-    reversed_dict_days_and_row_index
+from excel_utils.open_check_funcs import check_new_file, open_to_dict, data_to_json, to_lists_of_column, \
+    data_from_json, reversed_dict_days_and_row_index
 from excel_utils.parsing_funcs import all_days_in_schedule_file
 from loader import excel_file_name, schedules_excel_dir, json_excel_file, json_days_list, json_days_with_index, \
     json_days_with_lines, json_timing, json_saints
