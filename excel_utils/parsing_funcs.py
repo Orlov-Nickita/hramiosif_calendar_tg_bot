@@ -4,8 +4,11 @@
 
 from excel_utils.open_check_funcs import data_from_json
 from loader import schedules_excel_dir, json_days_list, json_saints, json_timing, \
-    json_days_with_index, json_days_with_lines
+    json_days_with_index, json_days_with_lines, week_days
 from utils.logger import logger
+import datetime
+
+from loader import all_months_in_calendar
 
 
 def all_days_in_schedule_file(jsonfile: str) -> dict:
@@ -75,6 +78,14 @@ def find_information_in_file(day: str,
     return text_to_print
 
 
+def day_name(day):
+    month_num = all_months_in_calendar.index(day.split()[1])
+    date = f'{day.split()[0]} {month_num + 1}'
+    a = datetime.datetime.strptime(date, '%d %m').weekday()
+    
+    return week_days[a - 1]
+
+
 def schedule_for_a_specific_day(day: str, username: str, user_id: int) -> str:
     """
     Функция для поиска расписания и памятки на определенный день.
@@ -93,13 +104,14 @@ def schedule_for_a_specific_day(day: str, username: str, user_id: int) -> str:
         saints_memorial_day = find_information_in_file(day=day,
                                                        saint=True)
         
-        return '<u>{day}</u>\n' \
+        return '<u>{day}, {week_day}</u>\n' \
                '{saint}' \
                '\n' \
                '\n' \
                'Расписание:\n' \
                '{schedule}'.format(
             day=day,
+            week_day=day_name(day).lower(),
             saint=saints_memorial_day,
             schedule=day_schedule)
     
@@ -127,7 +139,8 @@ def schedule_for_some_days(days: list, username: str, user_id: int) -> str:
                                                     timing=True)
             saints_memorial_day = find_information_in_file(day=day,
                                                            saint=True)
-            text += '<u>{day}</u>\n' \
+            
+            text += '<u>{day}, {week_day}</u>\n' \
                     '{saint}' \
                     '\n' \
                     '\n' \
@@ -136,6 +149,7 @@ def schedule_for_some_days(days: list, username: str, user_id: int) -> str:
                     '\n' \
                     '\n'.format(
                 day=day,
+                week_day=day_name(day).lower(),
                 saint=saints_memorial_day,
                 schedule=day_schedule)
         

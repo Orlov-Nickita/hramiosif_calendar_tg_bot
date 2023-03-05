@@ -41,9 +41,10 @@ def IKM_schedule_option() -> types.InlineKeyboardMarkup:
     
     btn1 = types.InlineKeyboardButton(text='На конкретный день', callback_data='day')
     btn2 = types.InlineKeyboardButton(text='На текущую неделю', callback_data='week')
-    btn3 = types.InlineKeyboardButton(text='На текущий месяц', callback_data='month')
+    btn3 = types.InlineKeyboardButton(text='На следующую неделю', callback_data='next_week')
+    btn4 = types.InlineKeyboardButton(text='На текущий месяц', callback_data='month')
     
-    ikm_schedule_option.add(btn1, btn2, btn3)
+    ikm_schedule_option.add(btn1, btn2, btn3, btn4)
     
     return ikm_schedule_option
 
@@ -82,16 +83,32 @@ def IKM_date_schedule_choice(days_list: list) -> types.InlineKeyboardMarkup:
     return ikm_date_schedule_choice
 
 
-def IKM_week_schedule_choice() -> types.InlineKeyboardMarkup:
+def IKM_week_schedule_choice_1() -> types.InlineKeyboardMarkup:
     """
     Клавиатура появляется после выбора кнопки с расписанием и предлагает выбрать месяц.
     :return: Возвращается следующая клавиатура с выбором других опций
     """
     ikm_week_schedule_choice = types.InlineKeyboardMarkup(row_width=1)
     
-    btn1 = types.InlineKeyboardButton(text='Показать расписание текстом', callback_data='text_schedule')
-    btn2 = types.InlineKeyboardButton(text='Прислать расписание файлом', callback_data='file_schedule')
-    btn3 = types.InlineKeyboardButton(text='Вернуться назад', callback_data='return')
+    btn1 = types.InlineKeyboardButton(text='Показать расписание текстом', callback_data='text_schedule_this')
+    btn2 = types.InlineKeyboardButton(text='Прислать расписание файлом', callback_data='file_schedule_this')
+    btn3 = types.InlineKeyboardButton(text='Вернуться назад', callback_data='return_this')
+    
+    ikm_week_schedule_choice.add(btn1, btn2, btn3)
+    
+    return ikm_week_schedule_choice
+
+
+def IKM_week_schedule_choice_2() -> types.InlineKeyboardMarkup:
+    """
+    Клавиатура появляется после выбора кнопки с расписанием и предлагает выбрать месяц.
+    :return: Возвращается следующая клавиатура с выбором других опций
+    """
+    ikm_week_schedule_choice = types.InlineKeyboardMarkup(row_width=1)
+    
+    btn1 = types.InlineKeyboardButton(text='Показать расписание текстом', callback_data='text_schedule_next')
+    btn2 = types.InlineKeyboardButton(text='Прислать расписание файлом', callback_data='file_schedule_next')
+    btn3 = types.InlineKeyboardButton(text='Вернуться назад', callback_data='return_next')
     
     ikm_week_schedule_choice.add(btn1, btn2, btn3)
     

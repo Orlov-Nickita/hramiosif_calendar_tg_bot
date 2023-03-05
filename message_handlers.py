@@ -5,6 +5,7 @@
 import telebot.types
 from telegram import ParseMode
 
+from christian_calendar import send_information
 from commands import c_start, c_help, c_keyboard, admin_panel, t_schedule
 from loader import bot, administrators
 from utils.logger import logger

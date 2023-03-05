@@ -2,12 +2,12 @@
 Модуль с функциями для работы с Excel файлом и для записи данных в JSON
 """
 
-
 import json
 import pandas as pd
 import telebot
 
-from loader import all_months_in_calendar, bot
+from loader import all_months_in_calendar, bot, administrators
+from utils.logger import logger
 
 
 def remove_timestamp_from_dataframe(dt):
@@ -33,13 +33,21 @@ def open_to_dict(excel_file: str, message: telebot.types.Message) -> dict:
     
     try:
         data_from_excel['Дата'] = data_from_excel['Дата'].apply(remove_timestamp_from_dataframe)
-        
-    except AttributeError:
+    
+    except Exception as Exec:
         bot.send_message(chat_id=message.chat.id,
                          text='Произошла ошибка прочтения файла. Скорее всего некорректно внесена дата '
-                              'в ячейки')
-        exit()
+                              'в ячейки, либо шапка таблицы отсутствует, либо нет слова Дата')
+
+        logger.error('Произошла ошибка:\n{}'.format(Exec))
+
+        bot.send_message(chat_id=administrators['Никита'],
+                         text=f'Произошла ошибка в функции open_to_dict\n'
+                              f'\n'
+                              f'{Exec}')
         
+        exit()
+    
     else:
         return data_from_excel.to_dict()
 
@@ -78,6 +86,7 @@ def str_to_int_key(i_dict: dict) -> dict:
             temp_dict.update({int(i): temp_list[i]})
         i_dict[key] = temp_dict
     return i_dict
+
 
 def reversed_dict_days_and_row_index(i_dict: dict):
     """
