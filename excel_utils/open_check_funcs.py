@@ -1,7 +1,6 @@
 """
 Модуль с функциями для работы с Excel файлом и для записи данных в JSON
 """
-
 import json
 import pandas as pd
 import telebot
@@ -15,6 +14,13 @@ def remove_timestamp_from_dataframe(dt):
     Вспомогательная функция для очистки всех Timestamp из Excel файла после переноса в DataFrame в Pandas
     """
     if dt != '-':
+        if 'strftime' not in dir(dt):
+            dt = dt.split(' ')
+            if len(dt[0]) == 1:
+                return f'0{dt[0]} {dt[1]}'
+            
+            return f'{dt[0]} {dt[1]}'
+        
         return dt.strftime('%d {}'.format(all_months_in_calendar[int(dt.strftime('%m')) - 1]))
     
     else:
@@ -44,7 +50,15 @@ def open_to_dict(excel_file: str, message: telebot.types.Message) -> dict:
         bot.send_message(chat_id=administrators['Никита'],
                          text=f'Произошла ошибка в функции open_to_dict\n'
                               f'\n'
-                              f'{Exec}')
+                              f'Произошла ошибка прочтения файла. Скорее всего некорректно внесена дата '
+                              'в ячейки, либо шапка таблицы отсутствует, либо нет слова Дата '
+                              'у пользователя {id} {name} {f_name} {username}\n'
+                              '\n'
+                              '{exec}'.format(id=message.chat.id,
+                                              name=message.from_user.first_name,
+                                              f_name=message.from_user.last_name,
+                                              username=message.from_user.username,
+                                              exec=Exec))
         
         exit()
     
@@ -124,4 +138,7 @@ def check_new_file(new_file: str, filejson: str, message: telebot.types.Message)
     param new_file: Новый файл Excel
     param filejson: Текущий файл с информацией JSON
     """
-    return open_to_dict(new_file, message) == str_to_int_key(data_from_json(filejson))
+    try:
+        return open_to_dict(new_file, message) == str_to_int_key(data_from_json(filejson))
+    except json.decoder.JSONDecodeError:
+        return False

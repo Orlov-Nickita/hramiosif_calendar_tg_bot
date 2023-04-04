@@ -6,10 +6,13 @@ import time
 import telebot
 from telegram import ParseMode
 from keyboards_for_bot.admin_keyboards import IKM_admin_update_send_conf
-from loader import bot, hdd_dir, update_jgp, admin_manual_name, admin_manual_dir
+from loader import bot, hdd_dir, update_jgp, admin_manual_name, admin_manual_dir, administrators, info_jgp, \
+    users_sql_dir, users_sql_file_name
 # from loader import users_sql_dir, users_sql_file_name
 from utils.custom_funcs import button_text
 from utils.logger import logger
+from utils.sql_funcs import get_info_from_sql_for_followers
+
 # from utils.sql_funcs import get_info_from_sql
 
 update_msg_text = ''
@@ -31,25 +34,41 @@ def start(message: telebot.types.Message) -> None:
     # all_persons = [459901923, 434895679, 949421028]
     all_persons = [949421028]
     
+    # global update_msg_text
+    # update_msg_text = 'Уважаемые пользователи,\n' \
+    #                   '\n' \
+    #                   'Мы видим, что Вы запрашиваете расписание, но, к сожалению, мы еще не получили расписание от ' \
+    #                   'настоятеля Храма. Приносим свои извинения, уведомим Вас, когда расписание станет доступным'
+    #
+    # bot.send_photo(chat_id=message.chat.id,
+    #                photo=open(hdd_dir + update_jgp, 'rb'),
+    #                caption=f'Будет отправлено {len(all_persons)} сообщений.\n'
+    #                        f'Выглядеть будет так:\n'
+    #                        f'\n'
+    #                        f'{update_msg_text}\n'
+    #                        f'\n'
+    #                        f'Подтвердите отправку',
+    #                reply_markup=IKM_admin_update_send_conf())
+    if message.chat.id == administrators['Никита']:
+        msg = bot.send_message(chat_id=message.chat.id,
+                               text='Что отправим?')
+        
+        bot.register_next_step_handler(message=msg, callback=preparation_before_send)
+
+
+def preparation_before_send(message: telebot.types.Message) -> None:
+    logger.info(
+        'Запущена функция preparation_before_send',
+        username=message.from_user.username,
+        user_id=message.chat.id)
+    
     global update_msg_text
-    update_msg_text = 'Обновление!\n' \
-                      '\n' \
-                      '1. Добавлен файловый менеджер, который позволяет посмотреть все сохраненные файлы на ' \
-                      'жестком диске. Команда находится в панели ' \
-                      'управления. Постарался сделать интуитивно понятным\n' \
-                      '2. Изменилось название для сохраняемого файла с месячным расписанием. Теперь название ' \
-                      'формируется по принципу ({месяц} {год}.pdf) (например, Январь 2023.pdf)\n' \
-                      '3. Изменено сообщение после команды /start\n' \
-                      '4. Изменено сообщение после команды /help\n'
+    update_msg_text = message.text
     
     bot.send_photo(chat_id=message.chat.id,
-                   photo=open(hdd_dir + update_jgp, 'rb'),
-                   caption=f'Будет отправлено {len(all_persons)} сообщений.\n'
-                           f'Выглядеть будет так:\n'
-                           f'\n'
-                           f'{update_msg_text}\n'
-                           f'\n'
-                           f'Подтвердите отправку',
+                   # photo=open(hdd_dir + update_jgp, 'rb'),
+                   photo=open(hdd_dir + info_jgp, 'rb'),
+                   caption=update_msg_text,
                    reply_markup=IKM_admin_update_send_conf())
 
 
@@ -79,30 +98,58 @@ def send_update_msg_confirm(call: telebot.types.CallbackQuery) -> None:
     else:
         global update_msg_text
         
-        # all_persons = get_info_from_sql(sql_base=users_sql_dir + users_sql_file_name,
-        #                                 message=message)
+        all_persons = get_info_from_sql_for_followers(sql_base=users_sql_dir + users_sql_file_name,
+                                                      message=call.message)
         
         # all_persons = [459901923, 434895679, 949421028]
-        all_persons = [949421028]
+        # all_persons = [949421028]
         
         count_txt = 0
+        not_found = []
         for person in all_persons:
             time.sleep(0.5)
-            print(update_msg_text)
-
-            bot.send_photo(chat_id=person,
-                           photo=open(hdd_dir + update_jgp, 'rb'),
-                           caption=update_msg_text,
-                           parse_mode=ParseMode.HTML)
             
-            bot.send_document(chat_id=person,
-                              document=open(admin_manual_dir + admin_manual_name, 'rb'))
+            try:
+                bot.send_photo(chat_id=person,
+                               # photo=open(hdd_dir + update_jgp, 'rb'),
+                               photo=open(hdd_dir + info_jgp, 'rb'),
+                               caption=update_msg_text,
+                               parse_mode=ParseMode.HTML)
+                
+                logger.info('Сообщение № {}.\n'
+                            'Отправлено пользователю {}'.format(count_txt,
+                                                                person),
+                            user_id=call.message.chat.id)
+            
+            except telebot.apihelper.ApiTelegramException:
+                not_found.append(person)
+                
+                logger.info('Сообщение № {}.\n'
+                            'Пользователь {} не найден'.format(count_txt,
+                                                               person),
+                            user_id=call.message.chat.id)
+                continue
+            
+            except Exception as Exec:
+                logger.error('Произошла ошибка:\n{}'.format(Exec),
+                             user_id=call.message.chat.id)
+                continue
+            
+            # bot.send_document(chat_id=person,
+            #                   document=open(admin_manual_dir + admin_manual_name, 'rb'))
             
             count_txt += 1
         
-        logger.info('Бот разослал сообщения пользователям из базы данных {bd_list}.\n'
-                    'Текст сообщения {new_msg}\n'
-                    'Всего сообщений {qty_m}'.format(bd_list=all_persons,
-                                                     new_msg=update_msg_text,
-                                                     qty_m=count_txt),
+        t = bot.send_message(chat_id=call.message.chat.id,
+                             text='Бот разослал сообщения пользователям из базы данных.\n'
+                                  'Текст сообщения:\n'
+                                  '{new_msg}\n'
+                                  '\n'
+                                  'Всего сообщений: {qty_m} штук\n'
+                                  '\n'
+                                  'Не найдены пользователи: {not_found}'.format(new_msg=update_msg_text,
+                                                                                qty_m=count_txt,
+                                                                                not_found=not_found))
+        
+        logger.info(t.text,
                     user_id=call.message.chat.id)

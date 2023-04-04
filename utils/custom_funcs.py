@@ -98,9 +98,10 @@ def load_photo_or_doc_from_bot(bot, logger, msg: telebot.types.Message, src: str
             msg_func = bot.send_message(chat_id=msg.chat.id,
                                         text=bot_text,
                                         reply_markup=keyboard)
+            logger.info('Бот отправил сообщение "{}"'.format(msg_func.text),
+                        user_id=msg.chat.id)
         
         elif doc:
-            
             if not os.path.exists(schedules_excel_dir + json_excel_file):
                 data_to_json(json_file=schedules_excel_dir + json_excel_file,
                              data_dict_or_list={})
@@ -131,17 +132,28 @@ def load_photo_or_doc_from_bot(bot, logger, msg: telebot.types.Message, src: str
                 else:
                     msg_func = bot.send_message(chat_id=msg.chat.id,
                                                 text='Произошла ошибка')
+                logger.info('Бот отправил сообщение "{}"'.format(msg_func.text),
+                            user_id=msg.chat.id)
+            
+            else:
+                msg_func = bot.send_message(chat_id=msg.chat.id,
+                                            text='Файл точно такой же, как и у меня. Чтобы перезаписать данные, нужно '
+                                                 'чтобы файл содержал хоть сколько-нибудь отличную информацию от '
+                                                 'текущей')
+                logger.info('Бот отправил сообщение "{}"'.format(msg_func.text),
+                            user_id=msg.chat.id)
         
         elif other_week:
             msg_func = bot.send_message(chat_id=msg.chat.id,
                                         text=bot_text,
                                         reply_markup=keyboard)
+            logger.info('Бот отправил сообщение "{}"'.format(msg_func.text),
+                        user_id=msg.chat.id)
         
         else:
             msg_func = bot.edit_message_text(chat_id=msg.chat.id,
                                              message_id=msg.message_id,
                                              text=bot_text,
                                              reply_markup=keyboard)
-        
-        logger.info('Бот отправил сообщение "{}"'.format(msg_func.text),
-                    user_id=msg.chat.id)
+            logger.info('Бот отправил сообщение "{}"'.format(msg_func.text),
+                        user_id=msg.chat.id)

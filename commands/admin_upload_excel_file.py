@@ -1,7 +1,7 @@
 """
 Модуль обработки админ команды на загрузку Excel файла
 """
-
+import emoji
 import telebot
 import os.path
 
@@ -104,8 +104,8 @@ def upload_excel_file_func(message: telebot.types.Message) -> None:
 
 @bot.callback_query_handler(
     func=lambda call: call.data == 'yes_overwrite_excel'
-or call.data == 'no_leave_excel'
-and 'Excel уже есть. Перезаписать?' in call.message.text)
+                      or call.data == 'no_leave_excel'
+                      and 'Excel уже есть. Перезаписать?' in call.message.text)
 def overwrite_excel_func(call: telebot.types.CallbackQuery) -> None:
     """
     Функция для перезаписи файла Excel
@@ -120,10 +120,20 @@ def overwrite_excel_func(call: telebot.types.CallbackQuery) -> None:
         global src
         global downloaded_file
         
+        temp_mg = bot.edit_message_text(chat_id=call.message.chat.id,
+                                        message_id=call.message.message_id,
+                                        text='Минутку...{emoji}'.format(
+                                            emoji=emoji.emojize(':hourglass:',
+                                                                language='alias')))
+        
         load_photo_or_doc_from_bot(bot=bot, logger=logger, msg=call.message,
                                    src=src, downloaded_file=downloaded_file,
                                    bot_text='Файл перезаписан, Excel сохранен',
                                    doc=True)
+        
+        bot.delete_message(chat_id=call.message.chat.id,
+                           message_id=temp_mg.message_id)
+        
         global check_file_info
         check_file_info = False
     
