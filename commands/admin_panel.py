@@ -6,7 +6,7 @@ import emoji
 import telebot
 from telegram import ParseMode
 from commands import admin_photo_week_load, admin_logs, admin_photo_month_load, \
-    admin_upload_excel_file, admin_sql, admin_send_update_msg, admin_hdd_check
+    admin_upload_excel_file, admin_sql, admin_send_update_msg, admin_hdd_check, admin_send_manual
 from keyboards_for_bot.admin_keyboards import IKM_admin_panel_main, IKM_admin_open_menu, IKM_admin_panel_short
 from loader import bot, administrators
 from utils.logger import logger
@@ -54,6 +54,7 @@ def start(message: telebot.types.Message) -> None:
                                               or call.data == 'followers'
                                               or call.data == 'send_update_message'
                                               or call.data == 'hdd_check'
+                                              or call.data == 'admin_manual_download'
                                               and 'Панель управления' in call.message.text)
 def admin_panels_funcs(call: telebot.types.CallbackQuery) -> None:
     logger.info(
@@ -94,6 +95,9 @@ def admin_panels_funcs(call: telebot.types.CallbackQuery) -> None:
     
     if call.data == 'hdd_check':
         admin_hdd_check.start(call.message)
+
+    if call.data == 'admin_manual_download':
+        admin_send_manual.upload_admin_manual(call.message)
 
 
 @bot.callback_query_handler(

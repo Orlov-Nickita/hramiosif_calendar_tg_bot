@@ -32,7 +32,7 @@ def start(message: telebot.types.Message) -> None:
     #                                 message=message)
     
     # all_persons = [459901923, 434895679, 949421028]
-    all_persons = [949421028]
+    # all_persons = [949421028]
     
     # global update_msg_text
     # update_msg_text = 'Уважаемые пользователи,\n' \
@@ -98,39 +98,48 @@ def send_update_msg_confirm(call: telebot.types.CallbackQuery) -> None:
     else:
         global update_msg_text
         
-        all_persons = get_info_from_sql_for_followers(sql_base=users_sql_dir + users_sql_file_name,
-                                                      message=call.message)
+        # all_persons = get_info_from_sql_for_followers(sql_base=users_sql_dir + users_sql_file_name,
+        #                                               message=call.message)
+        
+        # print(get_info_from_sql_for_followers(sql_base=users_sql_dir + users_sql_file_name,
+        #                                               message=call.message))
         
         # all_persons = [459901923, 434895679, 949421028]
-        # all_persons = [949421028]
+        # all_persons = [949421028, 5022408096]
+        all_persons = [(949421028,), (5022408096,)]
+        # all_persons = [(5022408096,), (1201283009,), (1765957161,), (345707936,), (1692880786,)]
         
         count_txt = 0
         not_found = []
+        not_send = []
         for person in all_persons:
             time.sleep(0.5)
             
             try:
-                bot.send_photo(chat_id=person,
+                bot.send_photo(chat_id=person[0],
                                # photo=open(hdd_dir + update_jgp, 'rb'),
                                photo=open(hdd_dir + info_jgp, 'rb'),
                                caption=update_msg_text,
                                parse_mode=ParseMode.HTML)
-                
+                count_txt += 1
+
                 logger.info('Сообщение № {}.\n'
                             'Отправлено пользователю {}'.format(count_txt,
-                                                                person),
+                                                                person[0]),
                             user_id=call.message.chat.id)
             
             except telebot.apihelper.ApiTelegramException:
-                not_found.append(person)
+                not_found.append(person[0])
+                count_txt += 1
                 
                 logger.info('Сообщение № {}.\n'
                             'Пользователь {} не найден'.format(count_txt,
-                                                               person),
+                                                               person[0]),
                             user_id=call.message.chat.id)
                 continue
             
             except Exception as Exec:
+                not_send.append(person[0])
                 logger.error('Произошла ошибка:\n{}'.format(Exec),
                              user_id=call.message.chat.id)
                 continue
@@ -138,18 +147,21 @@ def send_update_msg_confirm(call: telebot.types.CallbackQuery) -> None:
             # bot.send_document(chat_id=person,
             #                   document=open(admin_manual_dir + admin_manual_name, 'rb'))
             
-            count_txt += 1
-        
-        t = bot.send_message(chat_id=call.message.chat.id,
-                             text='Бот разослал сообщения пользователям из базы данных.\n'
-                                  'Текст сообщения:\n'
-                                  '{new_msg}\n'
-                                  '\n'
-                                  'Всего сообщений: {qty_m} штук\n'
-                                  '\n'
-                                  'Не найдены пользователи: {not_found}'.format(new_msg=update_msg_text,
-                                                                                qty_m=count_txt,
-                                                                                not_found=not_found))
+        t = bot.send_message(
+            chat_id=call.message.chat.id,
+            text='Бот разослал сообщения пользователям из базы данных.\n'
+                 'Текст сообщения:\n'
+                 '{new_msg}\n'
+                 '\n'
+                 'Всего сообщений: {qty_m} штук\n'
+                 '\n'
+                 'Не найдены пользователи: {not_found}\n'
+                 '\n'
+                 'Не отправлено пользователям из-за ошибок: {not_send}'.format(
+                new_msg=update_msg_text,
+                qty_m=count_txt - len(not_found) - len(not_send),
+                not_found=not_found,
+                not_send=not_send))
         
         logger.info(t.text,
                     user_id=call.message.chat.id)

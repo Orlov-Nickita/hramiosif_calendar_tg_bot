@@ -117,5 +117,13 @@ def text_func(message: telebot.types.Message):
     #     send_information.start(message)
     
     else:
-        bot.send_message(chat_id=message.chat.id,
-                         text='Выберите пункт меню\n')
+        logger.info(
+            'Пользователь написал "{}"'.format(message.text),
+            username=message.from_user.username,
+            user_id=message.chat.id)
+        
+        msg = bot.send_message(chat_id=message.chat.id,
+                               text='Выберите пункт меню\n')
+        
+        logger.info('Бот ответил "{}"'.format(msg.text),
+                    user_id=message.chat.id)

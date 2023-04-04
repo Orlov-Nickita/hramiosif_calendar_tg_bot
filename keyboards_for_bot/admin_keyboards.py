@@ -42,8 +42,14 @@ def IKM_admin_panel_short() -> types.InlineKeyboardMarkup:
             emoji=emoji.emojize(':floppy_disk:',
                                 language='alias')),
         callback_data='hdd_check')
+
+    btn6 = types.InlineKeyboardButton(
+        text='{emoji} Руководство пользователя для администратора'.format(
+            emoji=emoji.emojize(':magnifying_glass_tilted_left:',
+                                language='alias')),
+        callback_data='admin_manual_download')
     
-    ikm_admin_panel_short.add(btn1, btn2, btn3, btn4, btn5)
+    ikm_admin_panel_short.add(btn1, btn2, btn3, btn4, btn5, btn6)
     
     return ikm_admin_panel_short
 
@@ -114,10 +120,16 @@ def IKM_admin_panel_main() -> types.InlineKeyboardMarkup:
             emoji=emoji.emojize(':floppy_disk:',
                                 language='alias')),
         callback_data='hdd_check')
+
+    btn11 = types.InlineKeyboardButton(
+        text='{emoji} Руководство пользователя для администратора'.format(
+            emoji=emoji.emojize(':magnifying_glass_tilted_left:',
+                                language='alias')),
+        callback_data='admin_manual_download')
     
     ikm_admin_panel_main.add(btn1, btn2, btn3, btn4,
                              btn5, btn6, btn7, btn8,
-                             btn9, btn10)
+                             btn9, btn10, btn11)
     
     return ikm_admin_panel_main
 
