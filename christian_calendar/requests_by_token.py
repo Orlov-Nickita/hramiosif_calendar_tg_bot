@@ -1,23 +1,27 @@
-import json
 import requests
+import telebot
 
-from christian_calendar.HTML_parser import html_to_text_parser
-from excel_utils.open_check_funcs import data_from_json
-from bs4 import BeautifulSoup
+from utils.HTML_parser import html_to_text_parser
+from excel_utils.open_check_funcs import data_from_json, data_to_json
+from utils.logger import logger
 
-apitoken = data_from_json('christ_api_token.json')['token']
+apitoken = data_from_json('./christian_calendar/jsons/christ_api_token.json')['token']
 
 headers = {
     'accept': 'application/json',
     'Authorization': 'Bearer {}'.format(apitoken),
 }
 
-def request_day_info_func(user_day: str) -> None:
+
+def get_day_info_func(message: telebot.types.Message, user_day: str, file_to: str) -> None:
     """
     Получение всей информации на выбранный пользователем день
     param user_day: День, для которого выполняется поиск
     return: В файл записывается вся информация о запрошенном дне
     """
+    logger.info('Запущена функция requests_by_token.get_day_info_func',
+                username=message.from_user.username,
+                user_id=message.chat.id)
     
     params = {
         'date[exact]': '{}'.format(user_day),
@@ -25,17 +29,36 @@ def request_day_info_func(user_day: str) -> None:
     
     day_info = requests.get('https://azbyka.ru/days/api/cache_dates', params=params, headers=headers).json()
     
-    with open('christ_day.json', 'w', encoding='utf-8') as file:
-        json.dump(day_info, file, indent=4, ensure_ascii=False)
+    data_to_json(file_to, day_info)
 
 
-def get_text_by_id(text_id: str):
+def get_text_by_id(message: telebot.types.Message, text_id: str):
+    """
+    Получение текста по его id и расшифровка посредством дополнительной функции от тегов HTML
+    param text_id: id текста в системе API
+    return: Возвращается читаемый текст
+    """
+    logger.info('Запущена функция requests_by_token.get_text_by_id',
+                username=message.from_user.username,
+                user_id=message.chat.id)
+    
     response = requests.get('https://azbyka.ru/days/api/texts/{}'.format(text_id), headers=headers).json()
-    # soup = BeautifulSoup(response['text'])
-    # print(soup.get_text())
-    return print(html_to_text_parser(response['text']))
-    # return soup.get_text()
+    text = html_to_text_parser(response['text'])
+    
+    return text
 
 
-# print(get_text_by_id('568'))
-# print(get_text_by_id('568'))
+def get_holiday_by_id(message: telebot.types.Message, holiday_id: str):
+    """
+    Получение праздника по его id и расшифровка посредством дополнительной функции от тегов HTML
+    param holiday_id: id праздника в системе API
+    return: Возвращается читаемый текст
+    """
+    logger.info('Запущена функция requests_by_token.get_holiday_by_id',
+                username=message.from_user.username,
+                user_id=message.chat.id)
+    
+    response = requests.get('https://azbyka.ru/days/api/holidays/{}'.format(holiday_id), headers=headers).json()
+    text = html_to_text_parser(response['title'])
+    
+    return text
