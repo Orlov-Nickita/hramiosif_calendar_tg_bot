@@ -1,109 +1,100 @@
 """
 Модуль со всеми командами, которые может обрабатывать бот
 """
-
-import telebot.types
-from telegram import ParseMode
-
-from christian_calendar import send_information
 from commands import c_start, c_help, c_keyboard, admin_panel, t_schedule
-from loader import bot, administrators
+from loader import bot, administrators, dp
 from utils.logger import logger
+from aiogram.types import ParseMode, Message
 
 
-@bot.message_handler(commands=['start'])
-def send_welcome_func(message: telebot.types.Message) -> None:
+@dp.message_handler(commands=['start'])
+async def send_welcome_func(message: Message) -> None:
     """
     Отправляет Пользователю стартовое сообщение
     :param message: В качестве параметра передается сообщение из чата
-    :type message: telebot.types.Message
+    :type message: aiogram.types.Message
     :return: Отправляется сообщение в чат
-    :rtype telebot.types.Message
-
+    :rtype aiogram.types.Message
     """
     logger.info('Запущена команда /start',
                 username=message.from_user.username,
                 user_id=message.chat.id)
-    c_start.start(message)
+    await c_start.start(message)
 
 
-@bot.message_handler(commands=['help'])
-def help_command_func(message: telebot.types.Message) -> None:
+@dp.message_handler(commands=['help'])
+async def help_command_func(message: Message) -> None:
     """
     Отправляет Пользователю вспомогательное сообщение с подсказками
     :param message: В качестве параметра передается сообщение из чата
-    :type message: telebot.types.Message
+    :type message: aiogram.types.Message
     :return: Отправляется сообщение в чат
-    :rtype telebot.types.Message
-
+    :rtype aiogram.types.Message
     """
     logger.info('Запущена команда /help',
                 username=message.from_user.username,
                 user_id=message.chat.id)
     
-    c_help.start(message)
+    await c_help.start(message)
 
 
-@bot.message_handler(commands=['keyboard'])
-def keyboard_open(message: telebot.types.Message) -> None:
+@dp.message_handler(commands=['keyboard'])
+async def keyboard_open(message: Message) -> None:
     """
     Открывает Пользователю клавиатуру внизу
     :param message: В качестве параметра передается сообщение из чата
-    :type message: telebot.types.Message
+    :type message: aiogram.types.Message
     :return: Отправляется сообщение в чат
-    :rtype telebot.types.Message
-
+    :rtype aiogram.types.Message
     """
     logger.info('Запущена команда /keyboard',
                 username=message.from_user.username,
                 user_id=message.chat.id)
     
-    c_keyboard.start(message)
+    await c_keyboard.start(message)
 
 
-@bot.message_handler(commands=['admin', 'Admin'])
-def admin_panel_func(message: telebot.types.Message) -> None:
+@dp.message_handler(commands=['admin', 'Admin'])
+async def admin_panel_func(message: Message) -> None:
     """
     Открывает панель управления для администраторов
     :param message: В качестве параметра передается сообщение из чата
-    :type message: telebot.types.Message
+    :type message: aiogram.types.Message
     :return: Отправляется сообщение в чат
-    :rtype telebot.types.Message
-
+    :rtype aiogram.types.Message
     """
     logger.info('Запущена команда /admin',
                 username=message.from_user.username,
                 user_id=message.chat.id)
     
-    if message.chat.id in administrators.values():
-        admin_panel.start(message)
+    if str(message.chat.id) in administrators.values():
+        await admin_panel.start(message)
     
     else:
-        bot.send_message(chat_id=message.chat.id,
-                         text='У Вас нет прав доступа')
+        await bot.send_message(chat_id=message.chat.id,
+                               text='У Вас нет прав доступа')
         
-        bot.send_message(chat_id=administrators['Никита'],
-                         text='Пользователь '
-                              'пытался получить доступ к администрированию:\n'
-                              'tg_id: <code>{id}</code>\n'
-                              'username: <code>{user}</code>\n'
-                              'name: <code>{name}</code>\n'
-                              'surname: <code>{surname}</code>\n'.format(id=message.chat.id,
-                                                                         user=message.from_user.username,
-                                                                         name=message.from_user.first_name,
-                                                                         surname=message.from_user.last_name),
-                         parse_mode=ParseMode.HTML
-                         )
+        await bot.send_message(chat_id=administrators['Никита'],
+                               text='Пользователь '
+                                    'пытался получить доступ к администрированию:\n'
+                                    'tg_id: <code>{id}</code>\n'
+                                    'Ник: <code>{user}</code>\n'
+                                    'Имя: <code>{name}</code>\n'
+                                    'Фамилия: <code>{surname}</code>\n'.format(id=message.chat.id,
+                                                                               user=message.from_user.username,
+                                                                               name=message.from_user.first_name,
+                                                                               surname=message.from_user.last_name),
+                               parse_mode=ParseMode.HTML)
 
 
-@bot.message_handler(content_types=['text'])
-def text_func(message: telebot.types.Message):
+@dp.message_handler(content_types=['text'])
+async def text_func(message: Message) -> None:
     """
     Функция, которая реагирует на сообщение пользователя из чата.
     :param message: В качестве параметра передается сообщение из чата
-    :type message: telebot.types.Message
+    :type message: aiogram.types.Message
     :return: None
-    :rtype: telebot.types.Message
+    :rtype: aiogram.types.Message
 
     """
     logger.info('Запущена команда /text',
@@ -111,10 +102,10 @@ def text_func(message: telebot.types.Message):
                 user_id=message.chat.id)
     
     if message.text.startswith('Уточнить расписание богослужений'):
-        t_schedule.start(message)
+        await t_schedule.start(message)
     
     # elif message.text.startswith('Посмотреть календарь'):
-    #     send_information.start(message)
+        # await send_information.start(message)
     
     else:
         logger.info(
@@ -122,8 +113,8 @@ def text_func(message: telebot.types.Message):
             username=message.from_user.username,
             user_id=message.chat.id)
         
-        msg = bot.send_message(chat_id=message.chat.id,
-                               text='Выберите пункт меню\n')
+        msg = await bot.send_message(chat_id=message.chat.id,
+                                     text='Выберите пункт меню\n')
         
         logger.info('Бот ответил "{}"'.format(msg.text),
                     user_id=message.chat.id)

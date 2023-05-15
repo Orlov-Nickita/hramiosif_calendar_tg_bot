@@ -3,11 +3,12 @@
 """
 
 import os.path
-
 from loader import log_dir, schedules_main_dir, users_sql_dir, users_sql_file_name
-from message_handlers import *
 from utils.logger import log_main
 import sqlite3 as sq
+from message_handlers import *
+from aiogram.utils import executor
+
 
 if __name__ == '__main__':
     print('ok')
@@ -15,7 +16,7 @@ if __name__ == '__main__':
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
         log_main.info('Создана папка logs')
-    
+
     if not os.path.exists(schedules_main_dir):
         os.makedirs(schedules_main_dir)
         log_main.info('Создана папка schedules')
@@ -23,7 +24,7 @@ if __name__ == '__main__':
     if not os.path.exists(users_sql_dir):
         os.makedirs(users_sql_dir)
         log_main.info('Создана папка sql')
-        
+
     if not os.path.exists(users_sql_dir + users_sql_file_name):
         base = open(users_sql_dir + users_sql_file_name, 'w')
         base.close()
@@ -48,5 +49,5 @@ if __name__ == '__main__':
             Путь TEXT,
             Корень TEXT
             )""")
-        
-    bot.infinity_polling()
+    
+    executor.start_polling(dispatcher=dp)

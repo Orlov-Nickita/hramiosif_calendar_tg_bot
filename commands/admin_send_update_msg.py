@@ -3,22 +3,20 @@
 """
 
 import time
-import telebot
-from telegram import ParseMode
+from aiogram.types import Message, ParseMode, CallbackQuery
+
 from keyboards_for_bot.admin_keyboards import IKM_admin_update_send_conf
 from loader import bot, hdd_dir, update_jgp, admin_manual_name, admin_manual_dir, administrators, info_jgp, \
-    users_sql_dir, users_sql_file_name
-# from loader import users_sql_dir, users_sql_file_name
+    users_sql_dir, users_sql_file_name, dp
+from loader import users_sql_dir, users_sql_file_name
 from utils.custom_funcs import button_text
 from utils.logger import logger
 from utils.sql_funcs import get_info_from_sql_for_followers
 
-# from utils.sql_funcs import get_info_from_sql
-
 update_msg_text = ''
 
 
-def start(message: telebot.types.Message) -> None:
+async def start(message: Message) -> None:
     """
     Административная панель управления ботом.
     :param message: Принимается сообщение от пользователя.
@@ -49,14 +47,14 @@ def start(message: telebot.types.Message) -> None:
     #                        f'\n'
     #                        f'Подтвердите отправку',
     #                reply_markup=IKM_admin_update_send_conf())
-    if message.chat.id == administrators['Никита']:
+    if message.chat.id == int(administrators['Никита']):
         msg = bot.send_message(chat_id=message.chat.id,
                                text='Что отправим?')
         
         bot.register_next_step_handler(message=msg, callback=preparation_before_send)
 
 
-def preparation_before_send(message: telebot.types.Message) -> None:
+async def preparation_before_send(message: Message) -> None:
     logger.info(
         'Запущена функция preparation_before_send',
         username=message.from_user.username,
@@ -65,16 +63,16 @@ def preparation_before_send(message: telebot.types.Message) -> None:
     global update_msg_text
     update_msg_text = message.text
     
-    bot.send_photo(chat_id=message.chat.id,
-                   # photo=open(hdd_dir + update_jgp, 'rb'),
-                   photo=open(hdd_dir + info_jgp, 'rb'),
-                   caption=update_msg_text,
-                   reply_markup=IKM_admin_update_send_conf())
+    await bot.send_photo(chat_id=message.chat.id,
+                         # photo=open(hdd_dir + update_jgp, 'rb'),
+                         photo=open(hdd_dir + info_jgp, 'rb'),
+                         caption=update_msg_text,
+                         reply_markup=IKM_admin_update_send_conf())
 
 
-@bot.callback_query_handler(
-    func=lambda call: call.data == 'yes_send_upd_msg' or call.data == 'no_send_upd_msg')
-def send_update_msg_confirm(call: telebot.types.CallbackQuery) -> None:
+@dp.callback_query_handler(
+    lambda call: call.data == 'yes_send_upd_msg' or call.data == 'no_send_upd_msg')
+async def send_update_msg_confirm(call: CallbackQuery) -> None:
     """
     Обработка нажатия на клавиатуре с подтверждением отправки сообщения с обновлениями
     param call: Нажатая кнопка на клавиатуре
@@ -86,11 +84,11 @@ def send_update_msg_confirm(call: telebot.types.CallbackQuery) -> None:
         user_id=call.message.chat.id)
     
     if call.data == 'no_send_upd_msg':
-        bot.delete_message(chat_id=call.message.chat.id,
-                           message_id=call.message.message_id)
+        await bot.delete_message(chat_id=call.message.chat.id,
+                                 message_id=call.message.message_id)
         
-        bot.send_message(chat_id=call.message.chat.id,
-                         text='Отправка сообщения отменена')
+        await bot.send_message(chat_id=call.message.chat.id,
+                               text='Отправка сообщения отменена')
         
         logger.info('Отправка сообщения отменена',
                     user_id=call.message.chat.id)
@@ -105,7 +103,7 @@ def send_update_msg_confirm(call: telebot.types.CallbackQuery) -> None:
         #                                               message=call.message))
         
         # all_persons = [459901923, 434895679, 949421028]
-        # all_persons = [949421028, 5022408096]
+        # all_persons = [949421028, 5022408096, 12444114124412421412]
         all_persons = [(949421028,), (5022408096,)]
         # all_persons = [(5022408096,), (1201283009,), (1765957161,), (345707936,), (1692880786,)]
         
@@ -116,27 +114,27 @@ def send_update_msg_confirm(call: telebot.types.CallbackQuery) -> None:
             time.sleep(0.5)
             
             try:
-                bot.send_photo(chat_id=person[0],
-                               # photo=open(hdd_dir + update_jgp, 'rb'),
-                               photo=open(hdd_dir + info_jgp, 'rb'),
-                               caption=update_msg_text,
-                               parse_mode=ParseMode.HTML)
+                await bot.send_photo(chat_id=person[0],
+                                     # photo=open(hdd_dir + update_jgp, 'rb'),
+                                     photo=open(hdd_dir + info_jgp, 'rb'),
+                                     caption=update_msg_text,
+                                     parse_mode=ParseMode.HTML)
                 count_txt += 1
-
+                
                 logger.info('Сообщение № {}.\n'
                             'Отправлено пользователю {}'.format(count_txt,
                                                                 person[0]),
                             user_id=call.message.chat.id)
             
-            except telebot.apihelper.ApiTelegramException:
-                not_found.append(person[0])
-                count_txt += 1
-                
-                logger.info('Сообщение № {}.\n'
-                            'Пользователь {} не найден'.format(count_txt,
-                                                               person[0]),
-                            user_id=call.message.chat.id)
-                continue
+            # except telebot.apihelper.ApiTelegramException:
+            #     not_found.append(person[0])
+            #     count_txt += 1
+            #
+            #     logger.info('Сообщение № {}.\n'
+            #                 'Пользователь {} не найден'.format(count_txt,
+            #                                                    person[0]),
+            #                 user_id=call.message.chat.id)
+            #     continue
             
             except Exception as Exec:
                 not_send.append(person[0])
@@ -146,8 +144,8 @@ def send_update_msg_confirm(call: telebot.types.CallbackQuery) -> None:
             
             # bot.send_document(chat_id=person,
             #                   document=open(admin_manual_dir + admin_manual_name, 'rb'))
-            
-        t = bot.send_message(
+        
+        t = await bot.send_message(
             chat_id=call.message.chat.id,
             text='Бот разослал сообщения пользователям из базы данных.\n'
                  'Текст сообщения:\n'

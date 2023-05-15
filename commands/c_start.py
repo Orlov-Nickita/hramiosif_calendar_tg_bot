@@ -2,16 +2,14 @@
 Модуль обработки команды start
 """
 
-import telebot
-import emoji
-
 from utils.sql_funcs import data_add
 from loader import bot, users_sql_dir, users_sql_file_name
 from utils.logger import logger
 from keyboards_for_bot.keyboards import RKM_for_the_menu
+from aiogram.types import Message
 
 
-def start(message: telebot.types.Message) -> None:
+async def start(message: Message) -> None:
     """
     Функция инициализации бота.
     :param message: Сообщение от пользователя.
@@ -21,17 +19,17 @@ def start(message: telebot.types.Message) -> None:
                 username=message.from_user.username,
                 user_id=message.chat.id)
     
-    msg = bot.send_message(chat_id=message.chat.id,
-                           text='Приветствую Вас!\n'
-                                'Выберите пункт меню для продолжения\n'
-                                '\n'
-                                'Если возникнет необходимость обратиться за помощью в '
-                                'поддержку, нажмите тут /help или выберите соответствующий пункт меню внизу',
-                           reply_markup=RKM_for_the_menu())
+    msg = await bot.send_message(chat_id=message.chat.id,
+                                 text='Приветствую Вас!\n'
+                                      'Выберите пункт меню для продолжения\n'
+                                      '\n'
+                                      'Если возникнет необходимость обратиться за помощью в '
+                                      'поддержку, нажмите тут /help или выберите соответствующий пункт меню внизу',
+                                 reply_markup=RKM_for_the_menu())
     
-    data_add(sql_base=users_sql_dir + users_sql_file_name,
-             message=message,
-             )
+    await data_add(sql_base=users_sql_dir + users_sql_file_name,
+                   message=message,
+                   )
     
     logger.info('Бот отправил сообщение\n"{}"'.format(msg.text),
                 user_id=message.chat.id)

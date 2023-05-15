@@ -2,14 +2,12 @@
 Модуль обработки админ команды на отправку документации
 """
 
-import telebot
-from telegram import ChatAction
-
+from aiogram.types import Message, ChatActions
 from loader import bot, admin_manual_dir, admin_manual_name
 from utils.logger import logger
 
 
-def upload_admin_manual(message: telebot.types.Message) -> None:
+async def upload_admin_manual(message: Message) -> None:
     """
     Функция для получения файла с документацией.
     :param message: Сообщение от пользователя.
@@ -19,10 +17,10 @@ def upload_admin_manual(message: telebot.types.Message) -> None:
                 username=message.chat.username,
                 user_id=message.chat.id)
     
-    bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_DOCUMENT)
+    await bot.send_chat_action(chat_id=message.chat.id, action=ChatActions.UPLOAD_DOCUMENT)
     
-    bot.send_document(chat_id=message.chat.id,
-                      document=open(admin_manual_dir + admin_manual_name, 'rb'))
+    await bot.send_document(chat_id=message.chat.id,
+                            document=open(admin_manual_dir + admin_manual_name, 'rb'))
     
     logger.info('Бот отправил документацию',
                 user_id=message.chat.id)

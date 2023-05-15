@@ -2,6 +2,8 @@
 Модуль отвечающий за настройку логгера
 """
 import logging
+from datetime import datetime
+import pytz
 from loader import log_dir, log_file_name
 
 
@@ -26,12 +28,12 @@ class CustomAdapter(logging.LoggerAdapter):
         
         username = user_dict_info.pop('username', self.extra['username'])
         user_id = user_dict_info.pop('user_id', self.extra['user_id'])
-        
         return '[username %s] - ' \
                '[user_id %s] - ' \
                '[%s]' % (username, user_id, log_message), user_dict_info
 
 
+logging.Formatter.converter = lambda *args: datetime.now(tz=pytz.timezone('Europe/Moscow')).timetuple()
 logging.basicConfig(filename=log_dir + log_file_name,
                     level=logging.INFO,
                     encoding='utf-8',

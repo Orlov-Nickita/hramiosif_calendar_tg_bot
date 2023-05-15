@@ -21,8 +21,9 @@ def all_days_in_schedule_file(jsonfile: str) -> dict:
     dirty_days_list = data_from_json(jsonfile)
     
     day_and_lines_dict = {}
+    temp_item = ''
+    
     for index, item in enumerate(dirty_days_list):
-        
         if item == 'Дата':
             """
             Если содержит слово Дата, то это строка пропускается
@@ -59,12 +60,13 @@ def find_information_in_file(day: str,
     """
     day_index = data_from_json(schedules_excel_dir + json_days_with_index)[day]
     cell_rows = data_from_json(schedules_excel_dir + json_days_with_lines)[day]
+    day_info = 0
     
     if saint:
         day_info = [i for i in data_from_json(schedules_excel_dir + json_saints)[day_index: day_index + cell_rows] if
                     i != '-']
     
-    elif timing:
+    if timing:
         day_info = [i for i in data_from_json(schedules_excel_dir + json_timing)[day_index: day_index + cell_rows] if
                     i != '-']
     

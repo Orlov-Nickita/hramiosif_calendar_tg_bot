@@ -4,20 +4,18 @@
 
 import datetime
 import os.path
-
+import emoji
 import pytz
-import telebot
-from telegram import ChatAction, ParseMode
-
 from excel_utils.open_check_funcs import data_from_json
 from excel_utils.parsing_funcs import schedule_for_a_specific_day, schedule_for_some_days
 from loader import bot, all_months_in_calendar, \
     schedules_excel_dir, json_days_list, schedule_photo_week_dir, week_photo_name, month_photo_name, \
-    schedule_photo_month_dir, all_months_in_calendar_for_save, administrators
+    schedule_photo_month_dir, all_months_in_calendar_for_save, administrators, dp
 from utils.logger import logger
 from keyboards_for_bot.keyboards import IKM_schedule_option, IKM_date_schedule_choice, IKM_open_schedule, \
     IKM_week_schedule_choice_1, IKM_week_schedule_choice_2
 from utils.custom_funcs import button_text
+from aiogram.types import Message, CallbackQuery, ChatActions, ParseMode
 
 ############################################
 """
@@ -25,7 +23,7 @@ from utils.custom_funcs import button_text
 """
 
 
-def start(message: telebot.types.Message) -> None:
+async def start(message: Message) -> None:
     """
     Стартовая функция формирования ответа на запрос расписания
     :param message: Сообщение от пользователя из чата
@@ -35,15 +33,15 @@ def start(message: telebot.types.Message) -> None:
     logger.info('Запущена функция t_schedule.start пользователь написал "{}"'.format(message.text),
                 username=message.from_user.username,
                 user_id=message.chat.id)
-    bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
+    await bot.send_chat_action(chat_id=message.chat.id, action=ChatActions.TYPING)
     
     if message.text.startswith('Уточнить расписание богослужений'):
         """
         В данном случае посылается на обработку запрос в функцию IKM_date_schedule_choice для вывода кнопок с датами
         """
-        msg = bot.send_message(chat_id=message.chat.id,
-                               text='Вы хотите уточнить расписание богослужений',
-                               reply_markup=IKM_schedule_option())
+        msg = await bot.send_message(chat_id=message.chat.id,
+                                     text='Вы хотите уточнить расписание богослужений',
+                                     reply_markup=IKM_schedule_option())
         
         logger.info('Бот ответил "{}"'.format(msg.text),
                     user_id=message.chat.id)
@@ -53,8 +51,8 @@ def start(message: telebot.types.Message) -> None:
         В данном случае была введена команда, которую бот еще не понимает и потому бот отправляет сообщение с просьбой
         выбрать пункт меню
         """
-        msg = bot.send_message(chat_id=message.chat.id,
-                               text='Выберите пункт меню')
+        msg = await bot.send_message(chat_id=message.chat.id,
+                                     text='Выберите пункт меню')
         
         logger.info('Бот ответил "{}"'.format(msg.text),
                     user_id=message.chat.id)
@@ -66,9 +64,10 @@ def start(message: telebot.types.Message) -> None:
 """
 
 
-@bot.callback_query_handler(func=lambda call: call.message.content_type == 'text' and call.message.text.startswith(
-    'Вы хотите уточнить расписание богослужений') and call.data == 'day')
-def day_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
+@dp.callback_query_handler(lambda call: call.message.content_type == 'text'
+                                        and call.message.text.startswith('Вы хотите уточнить расписание богослужений')
+                                        and call.data == 'day')
+async def day_choice_keyboard_callback(call: CallbackQuery) -> None:
     """
     Обработчик нажатия на клавиатуру с выбором даты. Выбран пункт "День"
     """
@@ -77,33 +76,45 @@ def day_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
         username=call.message.from_user.username,
         user_id=call.message.chat.id)
     
-    bot.send_chat_action(chat_id=call.message.chat.id, action=ChatAction.TYPING)
+    await bot.send_chat_action(chat_id=call.message.chat.id, action=ChatActions.TYPING)
     
     days = [i for i in data_from_json(schedules_excel_dir + json_days_list) if i != '-']
-    
     try:
-        msg = bot.edit_message_text(chat_id=call.message.chat.id,
-                                    message_id=call.message.message_id,
-                                    text='На какой день Вы хотели посмотреть расписание?',
-                                    reply_markup=IKM_date_schedule_choice(days_list=days))
+        msg = await bot.edit_message_text(chat_id=call.message.chat.id,
+                                          message_id=call.message.message_id,
+                                          text='На какой день Вы хотели посмотреть расписание?',
+                                          reply_markup=IKM_date_schedule_choice(days_list=days))
     
+    except ValueError as Exec:
+        logger.error('Произошла ошибка:\n{}'.format(Exec),
+                     user_id=call.message.chat.id)
+        
+        await bot.send_message(chat_id=administrators['Никита'],
+                               text='Произошла ошибка в функции day_choice_keyboard_callback '
+                                    'у пользователя {id}\n'
+                                    '\n'
+                                    '{exec}'.format(id=call.message.chat.id,
+                                                    exec=Exec))
+        
+        msg = await bot.send_message(chat_id=call.message.chat.id,
+                                     text='К сожалению, Храм еще не предоставил расписания, поэтому оно отсутствует. '
+                                          'Администраторы уже получили уведомление. Как только расписание будет '
+                                          'загружено, мы Вас уведомим {}'.format(emoji.emojize(':upside_down_face:',
+                                                                                               language='alias')))
     except Exception as Exec:
         logger.error('Произошла ошибка:\n{}'.format(Exec),
                      user_id=call.message.chat.id)
         
-        bot.send_message(chat_id=administrators['Никита'],
-                         text='Произошла ошибка в функции day_choice_keyboard_callback '
-                              'у пользователя {id} {name} {f_name} {username}\n'
-                              '\n'
-                              '{exec}'.format(id=call.message.chat.id,
-                                              name=call.message.from_user.first_name,
-                                              f_name=call.message.from_user.last_name,
-                                              username=call.message.from_user.username,
-                                              exec=Exec))
+        await bot.send_message(chat_id=administrators['Никита'],
+                               text='Произошла ошибка в функции day_choice_keyboard_callback '
+                                    'у пользователя {id}\n'
+                                    '\n'
+                                    '{exec}'.format(id=call.message.chat.id,
+                                                    exec=Exec))
         
-        msg = bot.send_message(chat_id=call.message.chat.id,
-                               text='Приносим извинения, возникла непредвиденная ошибка. Технические специалисты уже '
-                                    'работают над решением проблемы')
+        msg = await bot.send_message(chat_id=call.message.chat.id,
+                                     text='Приносим извинения, возникла непредвиденная ошибка. Технические специалисты '
+                                          'уже работают над решением проблемы')
     
     logger.info('Бот ответил "{}"'.format(msg.text),
                 user_id=call.message.chat.id)
@@ -115,9 +126,9 @@ def day_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
 """
 
 
-@bot.callback_query_handler(func=lambda call: call.message.content_type == 'text' and call.message.text.startswith(
+@dp.callback_query_handler(lambda call: call.message.content_type == 'text' and call.message.text.startswith(
     'На какой день Вы хотели посмотреть расписание') and call.data != 'open_again')
-def date_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
+async def date_choice_keyboard_callback(call: CallbackQuery) -> None:
     """
     Обработчик нажатия на клавиатуру с выбором даты. Это для меню на конкретный день
     """
@@ -126,7 +137,7 @@ def date_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
         username=call.message.from_user.username,
         user_id=call.message.chat.id)
     
-    bot.send_chat_action(chat_id=call.message.chat.id, action=ChatAction.TYPING)
+    await bot.send_chat_action(chat_id=call.message.chat.id, action=ChatActions.TYPING)
     
     if call.data == 'return':
         
@@ -134,10 +145,10 @@ def date_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
                     username=call.message.from_user.username,
                     user_id=call.message.chat.id)
         
-        bot.edit_message_text(text='Вы хотите уточнить расписание богослужений',
-                              chat_id=call.message.chat.id,
-                              message_id=call.message.message_id,
-                              reply_markup=IKM_schedule_option())
+        await bot.edit_message_text(text='Вы хотите уточнить расписание богослужений',
+                                    chat_id=call.message.chat.id,
+                                    message_id=call.message.message_id,
+                                    reply_markup=IKM_schedule_option())
     
     else:
         
@@ -145,8 +156,8 @@ def date_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
                     username=call.message.from_user.username,
                     user_id=call.message.chat.id)
         
-        msg = bot.edit_message_text(text='На какой день Вы хотели посмотреть расписание?\n'
-                                         '<i>- <code>Вы выбрали {button}</code></i>'.format(
+        msg = await bot.edit_message_text(text='На какой день Вы хотели посмотреть расписание?\n'
+                                               '<i>- <code>Вы выбрали {button}</code></i>'.format(
             button=button_text(call)),
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
@@ -156,16 +167,16 @@ def date_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
         logger.info('Бот отредактировал сообщение и написал\n"{}"'.format(msg.text),
                     user_id=call.message.chat.id)
         
-        bot.send_chat_action(chat_id=call.message.chat.id, action=ChatAction.TYPING)
+        await bot.send_chat_action(chat_id=call.message.chat.id, action=ChatActions.TYPING)
         
         try:
             schedule = schedule_for_a_specific_day(day=call.data,
                                                    username=call.message.from_user.username,
                                                    user_id=call.message.chat.id)
             
-            msg = bot.send_message(chat_id=call.message.chat.id,
-                                   text=schedule,
-                                   parse_mode=ParseMode.HTML)
+            msg = await bot.send_message(chat_id=call.message.chat.id,
+                                         text=schedule,
+                                         parse_mode=ParseMode.HTML)
             
             logger.info('Пользователь нажал на кнопку "{}"'.format(button_text(call)),
                         username=call.message.from_user.username,
@@ -183,19 +194,19 @@ def date_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
             logger.error('Произошла ошибка:\n{}'.format(Exec),
                          user_id=call.message.chat.id)
             
-            bot.send_message(chat_id=administrators['Никита'],
-                             text='Произошла ошибка в функции date_choice_keyboard_callback_this_week '
-                                  'у пользователя {id} {name} {f_name} {username}\n'
-                                  '\n'
-                                  '{exec}'.format(id=call.message.chat.id,
-                                                  name=call.message.from_user.first_name,
-                                                  f_name=call.message.from_user.last_name,
-                                                  username=call.message.from_user.username,
-                                                  exec=Exec))
+            await bot.send_message(chat_id=administrators['Никита'],
+                                   text='Произошла ошибка в функции date_choice_keyboard_callback_this_week '
+                                        'у пользователя {id} {name} {f_name} {username}\n'
+                                        '\n'
+                                        '{exec}'.format(id=call.message.chat.id,
+                                                        name=call.message.from_user.first_name,
+                                                        f_name=call.message.from_user.last_name,
+                                                        username=call.message.from_user.username,
+                                                        exec=Exec))
             
-            bot.send_message(chat_id=call.message.chat.id,
-                             text='Приносим извинения, возникла непредвиденная ошибка. Технические специалисты уже '
-                                  'работают над решением проблемы')
+            await bot.send_message(chat_id=call.message.chat.id,
+                                   text='Приносим извинения, возникла непредвиденная ошибка. Технические специалисты уже '
+                                        'работают над решением проблемы')
 
 
 ############################################
@@ -204,9 +215,9 @@ def date_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
 """
 
 
-@bot.callback_query_handler(func=lambda call: call.message.content_type == 'text' and call.message.text.startswith(
+@dp.callback_query_handler(lambda call: call.message.content_type == 'text' and call.message.text.startswith(
     'Вы хотите уточнить расписание богослужений') and (call.data == 'week' or call.data == 'next_week'))
-def week_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
+async def week_choice_keyboard_callback(call: CallbackQuery) -> None:
     """
     Обработчик нажатия на клавиатуру с выбором даты. Выбран пункт "Неделя". Предлагается выбор между текстом и файлом
     """
@@ -217,16 +228,18 @@ def week_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
         user_id=call.message.chat.id)
     
     if call.data == 'week':
-        msg = bot.edit_message_text(chat_id=call.message.chat.id,
-                                    message_id=call.message.message_id,
-                                    text='Вы хотели посмотреть расписание на текущую неделю. Выберите удобный вариант',
-                                    reply_markup=IKM_week_schedule_choice_1())
+        msg = await bot.edit_message_text(chat_id=call.message.chat.id,
+                                          message_id=call.message.message_id,
+                                          text='Вы хотели посмотреть расписание на текущую неделю. '
+                                               'Выберите удобный вариант',
+                                          reply_markup=IKM_week_schedule_choice_1())
     
     else:
-        msg = bot.edit_message_text(chat_id=call.message.chat.id,
-                                    message_id=call.message.message_id,
-                                    text='Вы хотели посмотреть расписание на следующую неделю. Выберите удобный вариант',
-                                    reply_markup=IKM_week_schedule_choice_2())
+        msg = await bot.edit_message_text(chat_id=call.message.chat.id,
+                                          message_id=call.message.message_id,
+                                          text='Вы хотели посмотреть расписание на следующую неделю. '
+                                               'Выберите удобный вариант',
+                                          reply_markup=IKM_week_schedule_choice_2())
     
     logger.info('Бот ответил "{}"'.format(msg.text),
                 user_id=call.message.chat.id)
@@ -238,9 +251,9 @@ def week_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
 """
 
 
-@bot.callback_query_handler(func=lambda call: call.message.content_type == 'text' and call.message.text.startswith(
+@dp.callback_query_handler(lambda call: call.message.content_type == 'text' and call.message.text.startswith(
     'Вы хотели посмотреть расписание на текущую неделю') and call.data != 'open_again')
-def date_choice_keyboard_callback_this_week(call: telebot.types.CallbackQuery) -> None:
+async def date_choice_keyboard_callback_this_week(call: CallbackQuery) -> None:
     """
     Обработчик нажатия на клавиатуру с выбором даты. Это для меню на неделю
     """
@@ -250,7 +263,7 @@ def date_choice_keyboard_callback_this_week(call: telebot.types.CallbackQuery) -
                 user_id=call.message.chat.id)
     
     if call.data == 'text_schedule_this':
-        bot.send_chat_action(chat_id=call.message.chat.id, action=ChatAction.TYPING)
+        await bot.send_chat_action(chat_id=call.message.chat.id, action=ChatActions.TYPING)
         
         try:
             today_digit = datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime("%d")
@@ -267,16 +280,16 @@ def date_choice_keyboard_callback_this_week(call: telebot.types.CallbackQuery) -
             
             rest_week = all_days_in_schedule[current_day:current_day + days_till_week_end]
             
-            bot.send_chat_action(chat_id=call.message.chat.id, action=ChatAction.TYPING)
+            await bot.send_chat_action(chat_id=call.message.chat.id, action=ChatActions.TYPING)
             
             week_schedule = schedule_for_some_days(days=rest_week,
                                                    username=call.message.from_user.username,
                                                    user_id=call.message.chat.id,
                                                    )
             
-            msg = bot.send_message(chat_id=call.message.chat.id,
-                                   text=week_schedule,
-                                   parse_mode=ParseMode.HTML)
+            msg = await bot.send_message(chat_id=call.message.chat.id,
+                                         text=week_schedule,
+                                         parse_mode=ParseMode.HTML)
             
             logger.info('Бот ответил\n"{}"'.format(msg.text),
                         user_id=call.message.chat.id)
@@ -285,55 +298,55 @@ def date_choice_keyboard_callback_this_week(call: telebot.types.CallbackQuery) -
             logger.error('Произошла ошибка:\n{}'.format(Exec),
                          user_id=call.message.chat.id)
             
-            bot.send_message(chat_id=administrators['Никита'],
-                             text='Произошла ошибка в функции date_choice_keyboard_callback_this_week '
-                                  'у пользователя {id} {name} {f_name} {username}\n'
-                                  '\n'
-                                  '{exec}'.format(id=call.message.chat.id,
-                                                  name=call.message.from_user.first_name,
-                                                  f_name=call.message.from_user.last_name,
-                                                  username=call.message.from_user.username,
-                                                  exec=Exec))
+            await bot.send_message(chat_id=administrators['Никита'],
+                                   text='Произошла ошибка в функции date_choice_keyboard_callback_this_week '
+                                        'у пользователя {id} {name} {f_name} {username}\n'
+                                        '\n'
+                                        '{exec}'.format(id=call.message.chat.id,
+                                                        name=call.message.from_user.first_name,
+                                                        f_name=call.message.from_user.last_name,
+                                                        username=call.message.from_user.username,
+                                                        exec=Exec))
             
-            bot.send_message(chat_id=call.message.chat.id,
-                             text='Приносим извинения, возникла непредвиденная ошибка. Технические специалисты уже работают над '
-                                  'решением проблемы')
+            await bot.send_message(chat_id=call.message.chat.id,
+                                   text='Приносим извинения, возникла непредвиденная ошибка. '
+                                        'Технические специалисты уже работают над решением проблемы')
     
     if call.data == 'file_schedule_this':
-        bot.send_chat_action(chat_id=call.message.chat.id, action=ChatAction.UPLOAD_PHOTO)
+        await bot.send_chat_action(chat_id=call.message.chat.id, action=ChatActions.UPLOAD_PHOTO)
         
         this_week_digit = int(datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime("%U"))
         
         if os.path.exists(schedule_photo_week_dir + week_photo_name.format(number=this_week_digit)):
-            bot.send_photo(chat_id=call.message.chat.id,
-                           photo=open(schedule_photo_week_dir + week_photo_name.format(number=this_week_digit),
-                                      'rb'))
+            await bot.send_photo(chat_id=call.message.chat.id,
+                                 photo=open(schedule_photo_week_dir + week_photo_name.format(number=this_week_digit),
+                                            'rb'))
             
             logger.info('Бот отправил фото week_{}.jpg'.format(this_week_digit),
                         user_id=call.message.chat.id)
         
         else:
-            msg = bot.send_message(chat_id=call.message.chat.id,
-                                   text='К сожалению, расписания на всю неделю в виде файла пока еще нет. Вы можете '
-                                        'написать в поддержку /help и поторопить их',
-                                   parse_mode=ParseMode.HTML)
+            msg = await bot.send_message(chat_id=call.message.chat.id,
+                                         text='К сожалению, расписания на всю неделю в виде файла пока еще нет. Вы можете '
+                                              'написать в поддержку /help и поторопить их',
+                                         parse_mode=ParseMode.HTML)
             
             logger.info('Бот ответил "{}"'.format(msg.text),
                         user_id=call.message.chat.id)
     
     elif call.data == 'return_this':
-        msg = bot.edit_message_text(text='Вы хотите уточнить расписание богослужений',
-                                    chat_id=call.message.chat.id,
-                                    message_id=call.message.message_id,
-                                    reply_markup=IKM_schedule_option())
+        msg = await bot.edit_message_text(text='Вы хотите уточнить расписание богослужений',
+                                          chat_id=call.message.chat.id,
+                                          message_id=call.message.message_id,
+                                          reply_markup=IKM_schedule_option())
         
         logger.info('Бот отредактировал сообщение и написал "{}"'.format(msg.text),
                     user_id=call.message.chat.id)
     
     else:
         
-        msg = bot.edit_message_text(text='Вы хотели посмотреть расписание на текущую неделю\n'
-                                         '<i>- <code>Вы выбрали {button}</code></i>'.format(
+        msg = await bot.edit_message_text(text='Вы хотели посмотреть расписание на текущую неделю\n'
+                                               '<i>- <code>Вы выбрали {button}</code></i>'.format(
             button=button_text(call)),
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
@@ -343,7 +356,7 @@ def date_choice_keyboard_callback_this_week(call: telebot.types.CallbackQuery) -
         logger.info('Бот отредактировал сообщение и написал\n"{}"'.format(msg.text),
                     user_id=call.message.chat.id)
         
-        bot.send_chat_action(chat_id=call.message.chat.id, action=ChatAction.TYPING)
+        await bot.send_chat_action(chat_id=call.message.chat.id, action=ChatActions.TYPING)
 
 
 ############################################
@@ -352,9 +365,9 @@ def date_choice_keyboard_callback_this_week(call: telebot.types.CallbackQuery) -
 """
 
 
-@bot.callback_query_handler(func=lambda call: call.message.content_type == 'text' and call.message.text.startswith(
+@dp.callback_query_handler(lambda call: call.message.content_type == 'text' and call.message.text.startswith(
     'Вы хотели посмотреть расписание на следующую неделю') and call.data != 'open_again')
-def date_choice_keyboard_callback_next_week(call: telebot.types.CallbackQuery) -> None:
+async def date_choice_keyboard_callback_next_week(call: CallbackQuery) -> None:
     """
     Обработчик нажатия на клавиатуру с выбором даты. Это для меню на неделю
     """
@@ -365,7 +378,7 @@ def date_choice_keyboard_callback_next_week(call: telebot.types.CallbackQuery) -
     
     if call.data == 'text_schedule_next':
         
-        bot.send_chat_action(chat_id=call.message.chat.id, action=ChatAction.TYPING)
+        await bot.send_chat_action(chat_id=call.message.chat.id, action=ChatActions.TYPING)
         
         try:
             day = datetime.datetime.now(pytz.timezone('Europe/Moscow'))
@@ -390,16 +403,16 @@ def date_choice_keyboard_callback_next_week(call: telebot.types.CallbackQuery) -
             
             all_week = all_days_in_schedule[next_mon:next_mon + days_till_week_end]
             
-            bot.send_chat_action(chat_id=call.message.chat.id, action=ChatAction.TYPING)
+            await bot.send_chat_action(chat_id=call.message.chat.id, action=ChatActions.TYPING)
             
             week_schedule = schedule_for_some_days(days=all_week,
                                                    username=call.message.from_user.username,
                                                    user_id=call.message.chat.id,
                                                    )
             
-            msg = bot.send_message(chat_id=call.message.chat.id,
-                                   text=week_schedule,
-                                   parse_mode=ParseMode.HTML)
+            msg = await bot.send_message(chat_id=call.message.chat.id,
+                                         text=week_schedule,
+                                         parse_mode=ParseMode.HTML)
             
             logger.info('Бот ответил\n"{}"'.format(msg.text),
                         user_id=call.message.chat.id)
@@ -408,55 +421,55 @@ def date_choice_keyboard_callback_next_week(call: telebot.types.CallbackQuery) -
             logger.error('Произошла ошибка:\n{}'.format(Exec),
                          user_id=call.message.chat.id)
             
-            bot.send_message(chat_id=administrators['Никита'],
-                             text='Произошла ошибка в функции date_choice_keyboard_callback_next_week '
-                                  'у пользователя {id} {name} {f_name} {username}\n'
-                                  '\n'
-                                  '{exec}'.format(id=call.message.chat.id,
-                                                  name=call.message.from_user.first_name,
-                                                  f_name=call.message.from_user.last_name,
-                                                  username=call.message.from_user.username,
-                                                  exec=Exec))
+            await bot.send_message(chat_id=administrators['Никита'],
+                                   text='Произошла ошибка в функции date_choice_keyboard_callback_next_week '
+                                        'у пользователя {id} {name} {f_name} {username}\n'
+                                        '\n'
+                                        '{exec}'.format(id=call.message.chat.id,
+                                                        name=call.message.from_user.first_name,
+                                                        f_name=call.message.from_user.last_name,
+                                                        username=call.message.from_user.username,
+                                                        exec=Exec))
             
-            bot.send_message(chat_id=call.message.chat.id,
-                             text='Приносим извинения, возникла непредвиденная ошибка. Технические специалисты уже '
-                                  'работают над решением проблемы')
+            await bot.send_message(chat_id=call.message.chat.id,
+                                   text='Приносим извинения, возникла непредвиденная ошибка. Технические специалисты уже '
+                                        'работают над решением проблемы')
     
     if call.data == 'file_schedule_next':
-        bot.send_chat_action(chat_id=call.message.chat.id, action=ChatAction.UPLOAD_PHOTO)
+        await bot.send_chat_action(chat_id=call.message.chat.id, action=ChatActions.UPLOAD_PHOTO)
         
         next_week_digit = int(datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime("%U")) + 1
         
         if os.path.exists(schedule_photo_week_dir + week_photo_name.format(number=next_week_digit)):
-            bot.send_photo(chat_id=call.message.chat.id,
-                           photo=open(schedule_photo_week_dir + week_photo_name.format(number=next_week_digit),
-                                      'rb'))
+            await bot.send_photo(chat_id=call.message.chat.id,
+                                 photo=open(schedule_photo_week_dir + week_photo_name.format(number=next_week_digit),
+                                            'rb'))
             
             logger.info('Бот отправил фото week_{}.jpg'.format(next_week_digit),
                         user_id=call.message.chat.id)
         
         else:
-            msg = bot.send_message(chat_id=call.message.chat.id,
-                                   text='К сожалению, расписания на всю неделю в виде файла пока еще нет. Вы можете '
-                                        'написать в поддержку /help и поторопить их',
-                                   parse_mode=ParseMode.HTML)
+            msg = await bot.send_message(chat_id=call.message.chat.id,
+                                         text='К сожалению, расписания на всю неделю в виде файла пока еще нет. Вы можете '
+                                              'написать в поддержку /help и поторопить их',
+                                         parse_mode=ParseMode.HTML)
             
             logger.info('Бот ответил "{}"'.format(msg.text),
                         user_id=call.message.chat.id)
     
     elif call.data == 'return_next':
-        msg = bot.edit_message_text(text='Вы хотите уточнить расписание богослужений',
-                                    chat_id=call.message.chat.id,
-                                    message_id=call.message.message_id,
-                                    reply_markup=IKM_schedule_option())
+        msg = await bot.edit_message_text(text='Вы хотите уточнить расписание богослужений',
+                                          chat_id=call.message.chat.id,
+                                          message_id=call.message.message_id,
+                                          reply_markup=IKM_schedule_option())
         
         logger.info('Бот отредактировал сообщение и написал "{}"'.format(msg.text),
                     user_id=call.message.chat.id)
     
     else:
         
-        msg = bot.edit_message_text(text='Вы хотели посмотреть расписание на следующую неделю\n'
-                                         '<i>- <code>Вы выбрали {button}</code></i>'.format(
+        msg = await bot.edit_message_text(text='Вы хотели посмотреть расписание на следующую неделю\n'
+                                               '<i>- <code>Вы выбрали {button}</code></i>'.format(
             button=button_text(call)),
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
@@ -466,7 +479,7 @@ def date_choice_keyboard_callback_next_week(call: telebot.types.CallbackQuery) -
         logger.info('Бот отредактировал сообщение и написал\n"{}"'.format(msg.text),
                     user_id=call.message.chat.id)
         
-        bot.send_chat_action(chat_id=call.message.chat.id, action=ChatAction.TYPING)
+        await bot.send_chat_action(chat_id=call.message.chat.id, action=ChatActions.TYPING)
 
 
 ############################################
@@ -475,9 +488,9 @@ def date_choice_keyboard_callback_next_week(call: telebot.types.CallbackQuery) -
 """
 
 
-@bot.callback_query_handler(func=lambda call: call.message.content_type == 'text' and call.message.text.startswith(
+@dp.callback_query_handler(lambda call: call.message.content_type == 'text' and call.message.text.startswith(
     'Вы хотите уточнить расписание богослужений') and call.data == 'month')
-def month_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
+async def month_choice_keyboard_callback(call: CallbackQuery) -> None:
     """
     Обработчик нажатия на клавиатуру с выбором даты. Выбран пункт "Месяц"
     """
@@ -487,7 +500,7 @@ def month_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
         username=call.message.from_user.username,
         user_id=call.message.chat.id)
     
-    bot.send_chat_action(chat_id=call.message.chat.id, action=ChatAction.UPLOAD_PHOTO)
+    await bot.send_chat_action(chat_id=call.message.chat.id, action=ChatActions.UPLOAD_PHOTO)
     
     this_month_digit = int(datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime("%m"))
     
@@ -496,19 +509,19 @@ def month_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
     
     if os.path.exists(schedule_photo_month_dir + month_photo_name.format(month=current_month,
                                                                          year=year_digit)):
-        bot.send_document(chat_id=call.message.chat.id,
-                          document=open(schedule_photo_month_dir + month_photo_name.format(month=current_month,
-                                                                                           year=year_digit),
-                                        'rb'))
+        await bot.send_document(chat_id=call.message.chat.id,
+                                document=open(schedule_photo_month_dir + month_photo_name.format(month=current_month,
+                                                                                                 year=year_digit),
+                                              'rb'))
         
         logger.info('Бот отправил файл {}.pdf'.format(current_month),
                     user_id=call.message.chat.id)
     
     else:
-        msg = bot.send_message(chat_id=call.message.chat.id,
-                               text='К сожалению, расписания на весь месяц в виде файла пока еще нет. Вы можете '
-                                    'написать в поддержку /help и поторопить их',
-                               parse_mode=ParseMode.HTML)
+        msg = await bot.send_message(chat_id=call.message.chat.id,
+                                     text='К сожалению, расписания на весь месяц в виде файла пока еще нет. Вы можете '
+                                          'написать в поддержку /help и поторопить их',
+                                     parse_mode=ParseMode.HTML)
         
         logger.info('Бот ответил "{}"'.format(msg.text),
                     user_id=call.message.chat.id)
@@ -520,8 +533,8 @@ def month_choice_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
 """
 
 
-@bot.callback_query_handler(func=lambda call: call.data == 'open_again')
-def date_open_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
+@dp.callback_query_handler(lambda call: call.data == 'open_again')
+async def date_open_keyboard_callback(call: CallbackQuery) -> None:
     """
     Обработчик нажатия на кнопку "Открыть меню" для повторного выбора дня и расписания
     """
@@ -534,28 +547,34 @@ def date_open_keyboard_callback(call: telebot.types.CallbackQuery) -> None:
     if 'На какой день Вы хотели посмотреть расписание?' in call.message.text:
         all_days_in_schedule = [i for i in data_from_json(schedules_excel_dir + json_days_list) if i != '-']
         
-        msg = bot.edit_message_text(
+        msg = await bot.edit_message_text(
             text='На какой день Вы хотели посмотреть расписание?',
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
             reply_markup=IKM_date_schedule_choice(days_list=all_days_in_schedule)
         )
+        
+        logger.info('Бот отредактировал сообщение и написал\n"{}"'.format(msg.text),
+                    user_id=call.message.chat.id)
     
     elif 'Вы хотели посмотреть расписание на текущую неделю' in call.message.text:
-        msg = bot.edit_message_text(
+        msg = await bot.edit_message_text(
             text='Вы хотели посмотреть расписание на текущую неделю. Выберите удобный вариант',
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
             reply_markup=IKM_week_schedule_choice_1()
         )
+        
+        logger.info('Бот отредактировал сообщение и написал\n"{}"'.format(msg.text),
+                    user_id=call.message.chat.id)
     
     elif 'Вы хотели посмотреть расписание на следующую неделю' in call.message.text:
-        msg = bot.edit_message_text(
+        msg = await bot.edit_message_text(
             text='Вы хотели посмотреть расписание на следующую неделю. Выберите удобный вариант',
             chat_id=call.message.chat.id,
             message_id=call.message.message_id,
             reply_markup=IKM_week_schedule_choice_2()
         )
-    
-    logger.info('Бот отредактировал сообщение и написал\n"{}"'.format(msg.text),
-                user_id=call.message.chat.id)
+        
+        logger.info('Бот отредактировал сообщение и написал\n"{}"'.format(msg.text),
+                    user_id=call.message.chat.id)

@@ -4,14 +4,12 @@
 
 import sqlite3 as sq
 import datetime
-
-import telebot
-
 from loader import bot, administrators
 from utils.logger import logger
+from aiogram.types import Message
 
 
-def data_add(sql_base: str, message: telebot.types.Message) -> None:
+async def data_add(sql_base: str, message: Message) -> None:
     """
     Функция, которая добавляет в базу данных информацию.
     :param sql_base: База данных.
@@ -52,21 +50,21 @@ def data_add(sql_base: str, message: telebot.types.Message) -> None:
         logger.error('Произошла ошибка:\n{}'.format(Exec),
                      user_id=message.chat.id)
         
-        bot.send_message(chat_id=administrators['Никита'],
-                         text='Произошла ошибка записи в базу данных\n'
-                              '\n'
-                              '{id}\n'
-                              '{date}\n'
-                              '{name}\n'
-                              '{f_name}\n'
-                              '{username}'.format(id=message.chat.id,
-                                                  date=date_msg,
-                                                  name=message.from_user.first_name,
-                                                  f_name=message.from_user.last_name,
-                                                  username=message.from_user.username))
+        await bot.send_message(chat_id=administrators['Никита'],
+                               text='Произошла ошибка записи в базу данных\n'
+                                    '\n'
+                                    '{id}\n'
+                                    '{date}\n'
+                                    '{name}\n'
+                                    '{f_name}\n'
+                                    '{username}'.format(id=message.chat.id,
+                                                        date=date_msg,
+                                                        name=message.from_user.first_name,
+                                                        f_name=message.from_user.last_name,
+                                                        username=message.from_user.username))
 
 
-def get_info_from_sql_for_followers(sql_base: str, message: telebot.types.Message) -> list:
+async def get_info_from_sql_for_followers(sql_base: str, message: Message) -> list:
     """
     Функция, которая определяет количество записей в БД.
     :param sql_base: База данных.
@@ -97,24 +95,25 @@ def get_info_from_sql_for_followers(sql_base: str, message: telebot.types.Messag
         logger.error('Произошла ошибка:\n{}'.format(Exec),
                      user_id=message.chat.id)
         
-        bot.send_message(chat_id=administrators['Никита'],
-                         text='Произошла ошибка извлечения данных из БД в функции get_info_from_sql_for_followers\n'
-                              '\n'
-                              '{id}\n'
-                              '{date}\n'
-                              '{name}\n'
-                              '{f_name}\n'
-                              '{username}'.format(id=message.chat.id,
-                                                  date=date_msg,
-                                                  name=message.from_user.first_name,
-                                                  f_name=message.from_user.last_name,
-                                                  username=message.from_user.username))
+        await bot.send_message(chat_id=administrators['Никита'],
+                               text='Произошла ошибка извлечения данных из БД в функции '
+                                    'get_info_from_sql_for_followers\n'
+                                    '\n'
+                                    '{id}\n'
+                                    '{date}\n'
+                                    '{name}\n'
+                                    '{f_name}\n'
+                                    '{username}'.format(id=message.chat.id,
+                                                        date=date_msg,
+                                                        name=message.from_user.first_name,
+                                                        f_name=message.from_user.last_name,
+                                                        username=message.from_user.username))
     
     return all_qty
 
 
-def sql_hdd_root_dir_get(sql_base: str, message: telebot.types.Message,
-                         koren: bool = False, path: bool = False) -> str:
+async def sql_hdd_root_dir_get(sql_base: str, message: Message,
+                               koren: bool = False, path: bool = False) -> str:
     """
     Извлечение корневой папки для конкретного пользователя для работы с файлами на жестком диске
     :param sql_base: База данных.
@@ -151,22 +150,22 @@ def sql_hdd_root_dir_get(sql_base: str, message: telebot.types.Message,
         logger.error('Произошла ошибка:\n{}'.format(Exec),
                      user_id=message.chat.id)
         
-        bot.send_message(chat_id=administrators['Никита'],
-                         text='Произошла ошибка извлечения данных из БД в функции sql_hdd_root_dir_get\n'
-                              '\n'
-                              '{id}\n'
-                              '{name}\n'
-                              '{f_name}\n'
-                              '{username}'.format(id=message.chat.id,
-                                                  name=message.from_user.first_name,
-                                                  f_name=message.from_user.last_name,
-                                                  username=message.from_user.username))
+        await bot.send_message(chat_id=administrators['Никита'],
+                               text='Произошла ошибка извлечения данных из БД в функции sql_hdd_root_dir_get\n'
+                                    '\n'
+                                    '{id}\n'
+                                    '{name}\n'
+                                    '{f_name}\n'
+                                    '{username}'.format(id=message.chat.id,
+                                                        name=message.from_user.first_name,
+                                                        f_name=message.from_user.last_name,
+                                                        username=message.from_user.username))
     
     return root_hdd[0]
 
 
-def sql_hdd_root_dir_update(sql_base: str, root_dir: str, message: telebot.types.Message,
-                            koren: bool = False, path: bool = False) -> None:
+async def sql_hdd_root_dir_update(sql_base: str, root_dir: str, message: Message,
+                                  koren: bool = False, path: bool = False) -> None:
     """
     Обновление корневой папки для конкретного пользователя для работы с файлами на жестком диске
     """
@@ -197,13 +196,13 @@ def sql_hdd_root_dir_update(sql_base: str, root_dir: str, message: telebot.types
         logger.error('Произошла ошибка:\n{}'.format(Exec),
                      user_id=message.chat.id)
         
-        bot.send_message(chat_id=administrators['Никита'],
-                         text='Произошла ошибка обновления данных в БД в функции sql_hdd_root_dir_update\n'
-                              '\n'
-                              '{id}\n'
-                              '{name}\n'
-                              '{f_name}\n'
-                              '{username}'.format(id=message.chat.id,
-                                                  name=message.from_user.first_name,
-                                                  f_name=message.from_user.last_name,
-                                                  username=message.from_user.username))
+        await bot.send_message(chat_id=administrators['Никита'],
+                               text='Произошла ошибка обновления данных в БД в функции sql_hdd_root_dir_update\n'
+                                    '\n'
+                                    '{id}\n'
+                                    '{name}\n'
+                                    '{f_name}\n'
+                                    '{username}'.format(id=message.chat.id,
+                                                        name=message.from_user.first_name,
+                                                        f_name=message.from_user.last_name,
+                                                        username=message.from_user.username))

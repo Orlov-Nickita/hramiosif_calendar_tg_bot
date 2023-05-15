@@ -2,12 +2,20 @@
 Модуль с некоторыми данными, хранящимися в переменных
 """
 
-import telebot
 import os
+
+from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from dotenv import load_dotenv
+from aiogram import Bot
+from aiogram.dispatcher import Dispatcher
+from aiogram.contrib.fsm_storage.memory import MemoryStorage
+
+storage = MemoryStorage()
 load_dotenv()
 
-bot = telebot.TeleBot(os.getenv('BOT_TOKEN'))
+bot = Bot(token=os.getenv('BOT_TOKEN'))
+dp = Dispatcher(bot, storage=storage)
+dp.middleware.setup(LoggingMiddleware())
 
 administrators = {'Никита': os.getenv('ADMINISTRATOR_NIKITA_1'),
                   "Nik": os.getenv('ADMINISTRATOR_NIKITA_2'),

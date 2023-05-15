@@ -2,51 +2,51 @@
 Модуль обработки админ команды на просмотр жесткого диска
 """
 
-from typing import List
-import telebot
 import os
 from keyboards_for_bot.admin_keyboards import IKM_admin_check_hdd, IKM_open_or_not_files_in_dir_hdd, \
     IKM_admin_in_dir_hdd_remove_conf, IKM_open_or_not_for_photo_in_dir_hdd
 from loader import bot, hdd_dir, administrators, users_sql_dir, users_sql_file_name, \
-    schedules_photos_dir
+    schedules_photos_dir, dp
 from utils.custom_funcs import button_text
 from utils.logger import logger
 from utils.sql_funcs import sql_hdd_root_dir_update, sql_hdd_root_dir_get
+from aiogram.types import Message, CallbackQuery
 
 
-def _get_root_hdd(msg, koren: bool = False, path: bool = False):
+async def _get_root_hdd(msg: Message, koren: bool = False, path: bool = False) -> str:
     """
     Декоратор для получения пути директории/файла в БД
     """
-    return sql_hdd_root_dir_get(sql_base=users_sql_dir + users_sql_file_name,
-                                message=msg,
-                                koren=koren,
-                                path=path)
+    return await sql_hdd_root_dir_get(sql_base=users_sql_dir + users_sql_file_name,
+                                      message=msg,
+                                      koren=koren,
+                                      path=path)
 
 
-def _update_root_hdd(msg, direc, koren: bool = False, path: bool = False):
+async def _update_root_hdd(msg: Message, direc: str, koren: bool = False, path: bool = False) -> None:
     """
     Декоратор для обновления пути директории/файла в БД
     """
-    sql_hdd_root_dir_update(sql_base=users_sql_dir + users_sql_file_name,
-                            root_dir=direc,
-                            koren=koren,
-                            path=path,
-                            message=msg)
+    await sql_hdd_root_dir_update(sql_base=users_sql_dir + users_sql_file_name,
+                                  root_dir=direc,
+                                  koren=koren,
+                                  path=path,
+                                  message=msg)
 
 
-def _up_dir(msg):
+async def _up_dir(msg: Message) -> None:
     """
     Декоратор для обновления пути директории или файла при возвращении назад
     """
-    up_dir = [i for i in _get_root_hdd(msg=msg, path=True).split('/') if i != '']
+    temp = await _get_root_hdd(msg=msg, path=True)
+    up_dir = [i for i in temp.split('/') if i != '']
     up_dir.pop()
     up_dir = '/'.join(up_dir) + '/'
-    _update_root_hdd(msg=msg, direc=up_dir,
-                     path=True)
+    await _update_root_hdd(msg=msg, direc=up_dir,
+                           path=True)
 
 
-def what_files_in_dir(directory: str) -> List:
+async def what_files_in_dir(directory: str) -> list:
     """
     Функция, которая выдает список файлов и папок в текущей директории
     param directory: путь к папке
@@ -64,7 +64,7 @@ def what_files_in_dir(directory: str) -> List:
     return files
 
 
-def start(message: telebot.types.Message) -> None:
+async def start(message: Message) -> None:
     """
     Функция проверки состояния жесткого диска.
     :param message: Принимается сообщение от пользователя.
@@ -74,27 +74,25 @@ def start(message: telebot.types.Message) -> None:
                 username=message.chat.username,
                 user_id=message.chat.id)
     
-    if message.chat.id == administrators['Никита']:
-        _update_root_hdd(msg=message, direc=hdd_dir, koren=True)
-        _update_root_hdd(msg=message, direc=hdd_dir, path=True)
+    if message.chat.id == int(administrators['Никита']):
+        await _update_root_hdd(msg=message, direc=hdd_dir, koren=True)
+        await _update_root_hdd(msg=message, direc=hdd_dir, path=True)
     
     else:
-        _update_root_hdd(msg=message, direc=schedules_photos_dir, koren=True)
-        _update_root_hdd(msg=message, direc=schedules_photos_dir, path=True)
+        await _update_root_hdd(msg=message, direc=schedules_photos_dir, koren=True)
+        await _update_root_hdd(msg=message, direc=schedules_photos_dir, path=True)
     
-    bot.send_message(chat_id=message.chat.id,
-                     text='Список файлов в папке {}'.format(''.join(
-                         _get_root_hdd(msg=message, path=True)
-                     )),
-                     reply_markup=IKM_admin_check_hdd(what_files_in_dir(''.join(
-                         _get_root_hdd(msg=message, path=True)
-                     ))))
+    await bot.send_message(chat_id=message.chat.id,
+                           text='Список файлов в папке {}'.format(''.join(
+                               await _get_root_hdd(msg=message, path=True))),
+                           reply_markup=IKM_admin_check_hdd(await what_files_in_dir(''.join(
+                               await _get_root_hdd(msg=message, path=True)))))
 
 
-@bot.callback_query_handler(func=lambda call: ('Папка' in button_text(call)
-                                               or call.data == 'return_dir_back')
-                                              and 'Список файлов' in call.message.text)
-def what_files_in_other_dir(call: telebot.types.CallbackQuery) -> None:
+@dp.callback_query_handler(lambda call: ('Папка' in button_text(call)
+                                         or call.data == 'return_dir_back')
+                                        and 'Список файлов' in call.message.text)
+async def what_files_in_other_dir(call: CallbackQuery) -> None:
     """
     Функция обработчик нажатия на кнопку с папкой
     """
@@ -106,53 +104,54 @@ def what_files_in_other_dir(call: telebot.types.CallbackQuery) -> None:
     
     if call.data != 'return_dir_back':
         try:
-            if not os.path.exists(_get_root_hdd(msg=call.message, path=True)):
+            if not os.path.exists(await _get_root_hdd(msg=call.message, path=True)):
                 raise FileNotFoundError
         
         except FileNotFoundError:
-            bot.edit_message_text(chat_id=call.message.chat.id,
-                                  message_id=call.message.message_id,
-                                  text='Я потерял путь до директории. Начните сначала')
+            await bot.edit_message_text(chat_id=call.message.chat.id,
+                                        message_id=call.message.message_id,
+                                        text='Я потерял путь до директории. Начните сначала')
         
         else:
-            _update_root_hdd(msg=call.message, direc=f'{_get_root_hdd(msg=call.message, path=True)}{call.data}/',
-                             path=True)
-            if not os.path.exists(_get_root_hdd(msg=call.message, path=True)):
+            await _update_root_hdd(msg=call.message,
+                                   direc=f'{await _get_root_hdd(msg=call.message, path=True)}{call.data}/',
+                                   path=True)
+            if not os.path.exists(await _get_root_hdd(msg=call.message, path=True)):
                 raise FileNotFoundError
             
-            bot.edit_message_text(chat_id=call.message.chat.id,
-                                  text='Список файлов в папке {}'.format(''.join(
-                                      _get_root_hdd(msg=call.message, path=True)
-                                  )),
-                                  message_id=call.message.message_id,
-                                  reply_markup=IKM_admin_check_hdd(what_files_in_dir(''.join(
-                                      _get_root_hdd(msg=call.message, path=True)
-                                  ))))
+            await bot.edit_message_text(chat_id=call.message.chat.id,
+                                        text='Список файлов в папке {}'.format(''.join(
+                                            await _get_root_hdd(msg=call.message, path=True)
+                                        )),
+                                        message_id=call.message.message_id,
+                                        reply_markup=IKM_admin_check_hdd(await what_files_in_dir(''.join(
+                                            await _get_root_hdd(msg=call.message, path=True)
+                                        ))))
     
     else:
-        if _get_root_hdd(msg=call.message, path=True) != _get_root_hdd(msg=call.message, koren=True):
-            _up_dir(msg=call.message)
-            bot.edit_message_text(chat_id=call.message.chat.id,
-                                  text='Список файлов в папке {}'.format(''.join(
-                                      _get_root_hdd(msg=call.message, path=True)
-                                  )),
-                                  message_id=call.message.message_id,
-                                  reply_markup=IKM_admin_check_hdd(what_files_in_dir(''.join(
-                                      _get_root_hdd(msg=call.message, path=True)
-                                  ))))
+        if await _get_root_hdd(msg=call.message, path=True) != await _get_root_hdd(msg=call.message, koren=True):
+            await _up_dir(msg=call.message)
+            await bot.edit_message_text(chat_id=call.message.chat.id,
+                                        text='Список файлов в папке {}'.format(''.join(
+                                            await _get_root_hdd(msg=call.message, path=True)
+                                        )),
+                                        message_id=call.message.message_id,
+                                        reply_markup=IKM_admin_check_hdd(await what_files_in_dir(''.join(
+                                            await _get_root_hdd(msg=call.message, path=True)
+                                        ))))
         
         else:
-            msg = bot.send_message(chat_id=call.message.chat.id,
-                                   text='Это корень диска, дальше переместиться нельзя')
+            msg = await bot.send_message(chat_id=call.message.chat.id,
+                                         text='Это корень диска, дальше переместиться нельзя')
             
             logger.info('Бот отправил сообщение\n"{}"'.format(msg.text),
                         user_id=call.message.chat.id)
 
 
-@bot.callback_query_handler(func=lambda call: ('Файл' in button_text(call)
-                                               or call.data == 'return_dir_back')
-                                              and 'Список файлов' in call.message.text)
-def wth_what_the_file(call: telebot.types.CallbackQuery) -> None:
+@dp.callback_query_handler(lambda call: ('Файл' in button_text(call)
+                                         or call.data == 'return_dir_back')
+                                        and 'Список файлов' in call.message.text)
+async def wth_what_the_file(call: CallbackQuery) -> None:
     """
     Функция обработчик нажатия на кнопку с файлом
     """
@@ -164,43 +163,44 @@ def wth_what_the_file(call: telebot.types.CallbackQuery) -> None:
     
     if call.data != 'return_dir_back':
         try:
-            if not os.path.exists(_get_root_hdd(msg=call.message, path=True)):
+            if not os.path.exists(await _get_root_hdd(msg=call.message, path=True)):
                 raise FileNotFoundError
         
         except FileNotFoundError:
-            bot.edit_message_text(chat_id=call.message.chat.id,
-                                  message_id=call.message.message_id,
-                                  text='Я потерял путь до директории. Начните сначала')
+            await bot.edit_message_text(chat_id=call.message.chat.id,
+                                        message_id=call.message.message_id,
+                                        text='Я потерял путь до директории. Начните сначала')
         
         else:
-            _update_root_hdd(msg=call.message, direc=f'{_get_root_hdd(msg=call.message, path=True)}{call.data}',
-                             path=True)
-            if not os.path.exists(_get_root_hdd(msg=call.message, path=True)):
+            await _update_root_hdd(msg=call.message,
+                                   direc=f'{await _get_root_hdd(msg=call.message, path=True)}{call.data}',
+                                   path=True)
+            if not os.path.exists(await _get_root_hdd(msg=call.message, path=True)):
                 raise FileNotFoundError
             
             if os.path.splitext(call.data)[1] == '.jpg' or os.path.splitext(call.data)[1] == '.png':
-                bot.delete_message(chat_id=call.message.chat.id,
-                                   message_id=call.message.message_id)
+                await bot.delete_message(chat_id=call.message.chat.id,
+                                         message_id=call.message.message_id)
                 
-                bot.send_photo(chat_id=call.message.chat.id,
-                               caption='Файл {}'.format(call.data),
-                               photo=open(''.join(
-                                   _get_root_hdd(msg=call.message, path=True)
-                               ), 'rb'),
-                               reply_markup=IKM_open_or_not_for_photo_in_dir_hdd())
+                await bot.send_photo(chat_id=call.message.chat.id,
+                                     caption='Файл {}'.format(call.data),
+                                     photo=open(''.join(
+                                         await _get_root_hdd(msg=call.message, path=True)
+                                     ), 'rb'),
+                                     reply_markup=IKM_open_or_not_for_photo_in_dir_hdd())
             
             else:
-                bot.edit_message_text(chat_id=call.message.chat.id,
-                                      text='Файл {}'.format(call.data),
-                                      message_id=call.message.message_id,
-                                      reply_markup=IKM_open_or_not_files_in_dir_hdd())
+                await bot.edit_message_text(chat_id=call.message.chat.id,
+                                            text='Файл {}'.format(call.data),
+                                            message_id=call.message.message_id,
+                                            reply_markup=IKM_open_or_not_files_in_dir_hdd())
 
 
-@bot.callback_query_handler(func=lambda call: (call.data == 'yes_open_hdd_file'
-                                               or call.data == 'no_open_hdd_file'
-                                               or call.data == 'remove_hdd_file')
-                            )
-def open_or_not_file_on_hdd(call: telebot.types.CallbackQuery) -> None:
+@dp.callback_query_handler(lambda call: (call.data == 'yes_open_hdd_file'
+                                         or call.data == 'no_open_hdd_file'
+                                         or call.data == 'remove_hdd_file')
+                           )
+async def open_or_not_file_on_hdd(call: CallbackQuery) -> None:
     """
     Функция обработчик выбора действия по отношению к файлу
     """
@@ -211,36 +211,36 @@ def open_or_not_file_on_hdd(call: telebot.types.CallbackQuery) -> None:
         user_id=call.message.chat.id)
     
     if call.data == 'yes_open_hdd_file':
-        bot.delete_message(chat_id=call.message.chat.id,
-                           message_id=call.message.message_id)
+        await bot.delete_message(chat_id=call.message.chat.id,
+                                 message_id=call.message.message_id)
         
-        bot.send_document(chat_id=call.message.chat.id,
-                          document=open(''.join(
-                              _get_root_hdd(msg=call.message, path=True)
-                          ), 'rb'))
+        await bot.send_document(chat_id=call.message.chat.id,
+                                document=open(''.join(
+                                    await _get_root_hdd(msg=call.message, path=True)
+                                ), 'rb'))
     
     elif call.data == 'no_open_hdd_file':
-        _up_dir(msg=call.message)
-        bot.edit_message_text(chat_id=call.message.chat.id,
-                              text='Список файлов в папке {}'.format(''.join(
-                                  _get_root_hdd(msg=call.message, path=True)
-                              )),
-                              message_id=call.message.message_id,
-                              reply_markup=IKM_admin_check_hdd(what_files_in_dir(''.join(
-                                  _get_root_hdd(msg=call.message, path=True)
-                              ))))
+        await _up_dir(msg=call.message)
+        await bot.edit_message_text(chat_id=call.message.chat.id,
+                                    text='Список файлов в папке {}'.format(''.join(
+                                        await _get_root_hdd(msg=call.message, path=True)
+                                    )),
+                                    message_id=call.message.message_id,
+                                    reply_markup=IKM_admin_check_hdd(await what_files_in_dir(''.join(
+                                        await _get_root_hdd(msg=call.message, path=True)
+                                    ))))
     
     elif call.data == 'remove_hdd_file':
-        bot.edit_message_text(chat_id=call.message.chat.id,
-                              message_id=call.message.message_id,
-                              text='Подтвердите удаление',
-                              reply_markup=IKM_admin_in_dir_hdd_remove_conf())
+        await bot.edit_message_text(chat_id=call.message.chat.id,
+                                    message_id=call.message.message_id,
+                                    text='Подтвердите удаление',
+                                    reply_markup=IKM_admin_in_dir_hdd_remove_conf())
 
 
-@bot.callback_query_handler(
-    func=lambda call: call.data == 'yes_remove_hdd_file'
-                      or call.data == 'no_remove_hdd_file')
-def remove_hdd_file(call: telebot.types.CallbackQuery) -> None:
+@dp.callback_query_handler(
+    lambda call: call.data == 'yes_remove_hdd_file'
+                 or call.data == 'no_remove_hdd_file')
+async def remove_hdd_file(call: CallbackQuery) -> None:
     """
     Функция обработчик выбора действия подтверждения удаления
     """
@@ -251,46 +251,46 @@ def remove_hdd_file(call: telebot.types.CallbackQuery) -> None:
         user_id=call.message.chat.id)
     
     if call.data == 'no_remove_hdd_file':
-        _up_dir(msg=call.message)
-        bot.edit_message_text(chat_id=call.message.chat.id,
-                              text='Список файлов в папке {}'.format(''.join(
-                                  _get_root_hdd(msg=call.message, path=True)
-                              )),
-                              message_id=call.message.message_id,
-                              reply_markup=IKM_admin_check_hdd(what_files_in_dir(''.join(
-                                  _get_root_hdd(msg=call.message, path=True)
-                              ))))
+        await _up_dir(msg=call.message)
+        await bot.edit_message_text(chat_id=call.message.chat.id,
+                                    text='Список файлов в папке {}'.format(''.join(
+                                        await _get_root_hdd(msg=call.message, path=True)
+                                    )),
+                                    message_id=call.message.message_id,
+                                    reply_markup=IKM_admin_check_hdd(await what_files_in_dir(''.join(
+                                        await _get_root_hdd(msg=call.message, path=True)
+                                    ))))
     else:
         try:
             deleted = ''.join(
-                _get_root_hdd(msg=call.message, path=True)
+                await _get_root_hdd(msg=call.message, path=True)
             )
             os.remove(deleted)
         
         except PermissionError as PerErr:
-            bot.delete_message(chat_id=call.message.chat.id,
-                               message_id=call.message.message_id)
+            await bot.delete_message(chat_id=call.message.chat.id,
+                                     message_id=call.message.message_id)
             
-            bot.send_message(chat_id=call.message.chat.id,
-                             text='Удалить файл не получилось')
+            await bot.send_message(chat_id=call.message.chat.id,
+                                   text='Удалить файл не получилось')
             
             logger.error(f'Ошибка {PerErr}',
                          user_id=call.message.chat.id)
         
         else:
-            bot.delete_message(chat_id=call.message.chat.id,
-                               message_id=call.message.message_id)
-            bot.send_message(chat_id=call.message.chat.id,
-                             text='Файл удален')
+            await bot.delete_message(chat_id=call.message.chat.id,
+                                     message_id=call.message.message_id)
+            await bot.send_message(chat_id=call.message.chat.id,
+                                   text='Файл удален')
             
             logger.warning('Пользователь удалил файл {}'.format(deleted),
                            user_id=call.message.chat.id)
 
 
-@bot.callback_query_handler(func=lambda call: (call.data == 'return_for_photo_in_dir_hdd'
-                                               or call.data == 'remove_for_photo_in_dir_hdd')
-                                              and call.message.content_type == 'photo')
-def open_or_remove_for_photo_in_dir_hdd(call: telebot.types.CallbackQuery) -> None:
+@dp.callback_query_handler(lambda call: (call.data == 'return_for_photo_in_dir_hdd'
+                                         or call.data == 'remove_for_photo_in_dir_hdd')
+                                        and call.message.content_type == 'photo')
+async def open_or_remove_for_photo_in_dir_hdd(call: CallbackQuery) -> None:
     """
     Функция обработчик выбора действия по отношению к фото
     """
@@ -302,32 +302,30 @@ def open_or_remove_for_photo_in_dir_hdd(call: telebot.types.CallbackQuery) -> No
         user_id=call.message.chat.id)
     
     if call.data == 'return_for_photo_in_dir_hdd':
-        bot.delete_message(chat_id=call.message.chat.id,
-                           message_id=call.message.message_id)
+        await bot.delete_message(chat_id=call.message.chat.id,
+                                 message_id=call.message.message_id)
         
-        _up_dir(msg=call.message)
-        bot.send_message(chat_id=call.message.chat.id,
-                         text='Список файлов в папке {}'.format(''.join(
-                             _get_root_hdd(msg=call.message, path=True)
-                         )),
-                         reply_markup=IKM_admin_check_hdd(what_files_in_dir(''.join(
-                             _get_root_hdd(msg=call.message, path=True)
-                         ))))
+        await _up_dir(msg=call.message)
+        await bot.send_message(chat_id=call.message.chat.id,
+                               text='Список файлов в папке {}'.format(''.join(
+                                   await _get_root_hdd(msg=call.message, path=True))),
+                               reply_markup=IKM_admin_check_hdd(await what_files_in_dir(''.join(
+                                   await _get_root_hdd(msg=call.message, path=True)))))
     
     if call.data == 'remove_for_photo_in_dir_hdd':
-        bot.edit_message_reply_markup(chat_id=call.message.chat.id,
-                                      message_id=call.message.message_id)
-        bot.send_message(chat_id=call.message.chat.id,
-                         text='Подтвердите удаление',
-                         reply_markup=IKM_admin_in_dir_hdd_remove_conf())
+        await bot.edit_message_reply_markup(chat_id=call.message.chat.id,
+                                            message_id=call.message.message_id)
+        await bot.send_message(chat_id=call.message.chat.id,
+                               text='Подтвердите удаление',
+                               reply_markup=IKM_admin_in_dir_hdd_remove_conf())
 
 
-@bot.callback_query_handler(func=lambda call: call.data == 'close_hdd'
-                                              and 'Список файлов' in call.message.text)
-def open_or_remove_for_photo_in_dir_hdd(call: telebot.types.CallbackQuery) -> None:
+@dp.callback_query_handler(lambda call: call.data == 'close_hdd'
+                                        and 'Список файлов' in call.message.text)
+async def open_or_remove_for_photo_in_dir_hdd(call: CallbackQuery) -> None:
     """
     Функция обработчик закрытия списка файлов на HDD
     """
     if call.data == 'close_hdd':
-        bot.delete_message(chat_id=call.message.chat.id,
-                           message_id=call.message.message_id)
+        await bot.delete_message(chat_id=call.message.chat.id,
+                                 message_id=call.message.message_id)

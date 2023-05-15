@@ -3,10 +3,9 @@
 """
 import json
 import pandas as pd
-import telebot
-
 from loader import all_months_in_calendar, bot, administrators
 from utils.logger import logger
+from aiogram.types import Message
 
 
 def remove_timestamp_from_dataframe(dt):
@@ -27,7 +26,7 @@ def remove_timestamp_from_dataframe(dt):
         return '-'
 
 
-def open_to_dict(excel_file: str, message: telebot.types.Message) -> dict:
+async def open_to_dict(excel_file: str, message: Message) -> dict:
     """
     Функция открывает файл Excel, убирает все пустые строчки и Timestamp, затем из DataFrame переделывает в словарь
     "Название столбца": {"Индекс (номер строки)": "Текст ячейки"}
@@ -41,24 +40,24 @@ def open_to_dict(excel_file: str, message: telebot.types.Message) -> dict:
         data_from_excel['Дата'] = data_from_excel['Дата'].apply(remove_timestamp_from_dataframe)
     
     except Exception as Exec:
-        bot.send_message(chat_id=message.chat.id,
-                         text='Произошла ошибка прочтения файла. Скорее всего некорректно внесена дата '
-                              'в ячейки, либо шапка таблицы отсутствует, либо нет слова Дата')
-
+        await bot.send_message(chat_id=message.chat.id,
+                               text='Произошла ошибка прочтения файла. Скорее всего некорректно внесена дата '
+                                    'в ячейки, либо шапка таблицы отсутствует, либо нет слова Дата')
+        
         logger.error('Произошла ошибка:\n{}'.format(Exec))
-
-        bot.send_message(chat_id=administrators['Никита'],
-                         text=f'Произошла ошибка в функции open_to_dict\n'
-                              f'\n'
-                              f'Произошла ошибка прочтения файла. Скорее всего некорректно внесена дата '
-                              'в ячейки, либо шапка таблицы отсутствует, либо нет слова Дата '
-                              'у пользователя {id} {name} {f_name} {username}\n'
-                              '\n'
-                              '{exec}'.format(id=message.chat.id,
-                                              name=message.from_user.first_name,
-                                              f_name=message.from_user.last_name,
-                                              username=message.from_user.username,
-                                              exec=Exec))
+        
+        await bot.send_message(chat_id=administrators['Никита'],
+                               text=f'Произошла ошибка в функции open_to_dict\n'
+                                    f'\n'
+                                    f'Произошла ошибка прочтения файла. Скорее всего некорректно внесена дата '
+                                    'в ячейки, либо шапка таблицы отсутствует, либо нет слова Дата '
+                                    'у пользователя {id} {name} {f_name} {username}\n'
+                                    '\n'
+                                    '{exec}'.format(id=message.chat.id,
+                                                    name=message.from_user.first_name,
+                                                    f_name=message.from_user.last_name,
+                                                    username=message.from_user.username,
+                                                    exec=Exec))
         
         exit()
     
@@ -132,13 +131,13 @@ def to_lists_of_column(excel_dict: dict) -> tuple:
     return date_col, saint_col, sch_col
 
 
-def check_new_file(new_file: str, filejson: str, message: telebot.types.Message) -> bool:
+async def check_new_file(new_file: str, filejson: str, message: Message) -> bool:
     """
     Функция проверки нового загружаемого файла Excel и текущего записанного JSON файла
     param new_file: Новый файл Excel
     param filejson: Текущий файл с информацией JSON
     """
     try:
-        return open_to_dict(new_file, message) == str_to_int_key(data_from_json(filejson))
+        return await open_to_dict(new_file, message) == str_to_int_key(data_from_json(filejson))
     except json.decoder.JSONDecodeError:
         return False
