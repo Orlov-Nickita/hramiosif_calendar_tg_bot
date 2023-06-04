@@ -11,7 +11,7 @@ from errors import FileError
 from keyboards_for_bot.admin_keyboards import IKM_admin_save_photo_again, \
     IKM_admin_month_save_photo, IKM_admin_overwrite_file_first_choice, \
     IKM_admin_overwrite_file_second_choice
-from loader import bot, schedule_photo_month_dir, month_photo_name, all_months_in_calendar_for_save, dp
+from loader import bot, schedule_photo_month_dir, month_photo_name, all_months_in_calendar_for_save, dp, administrators
 from utils.logger import logger
 from utils.custom_funcs import button_text, load_photo_or_doc_from_bot
 from aiogram.types import Message, CallbackQuery, ParseMode
@@ -175,6 +175,9 @@ async def save_photo_month(call: CallbackQuery, state: FSMContext) -> None:
                                                  bot_text='Расписание на месяц загружено',
                                                  keyboard=IKM_admin_save_photo_again(), state=state)
                 
+                await bot.send_message(chat_id=administrators['Никита'],
+                                       text='Пользователь {id} добавил расписание на месяц'.format(
+                                           id=call.message.chat.id))
                 await state.finish()
     
     elif call.data == 'other_month':
@@ -236,6 +239,10 @@ async def download_photo_month(message: Message, state: FSMContext) -> None:
                                                  bot_text='Расписание на месяц загружено',
                                                  other_week=True,
                                                  keyboard=IKM_admin_save_photo_again(), state=state)
+                
+                await bot.send_message(chat_id=administrators['Никита'],
+                                       text='Пользователь {id} добавил расписание на месяц'.format(
+                                           id=message.chat.id))
                 await state.finish()
     else:
         msg = await bot.send_message(chat_id=message.chat.id,
@@ -269,6 +276,9 @@ async def overwrite_month(call: CallbackQuery, state: FSMContext) -> None:
                                          bot_text='Файл перезаписан, расписание на месяц загружено',
                                          keyboard=IKM_admin_save_photo_again(), state=state)
         
+        await bot.send_message(chat_id=administrators['Никита'],
+                               text='Пользователь {id} добавил расписание на месяц'.format(
+                                   id=call.message.chat.id))
         await state.finish()
     
     elif call.data == 'no_overwrite':
@@ -315,6 +325,11 @@ async def overwrite_month_2(call: CallbackQuery, state: FSMContext) -> None:
                                          bot_text='Файл перезаписан, расписание на месяц загружено',
                                          keyboard=IKM_admin_save_photo_again(),
                                          photo=True, state=state)
+        
+        await bot.send_message(chat_id=administrators['Никита'],
+                               text='Пользователь {id} добавил расписание на месяц'.format(
+                                   id=call.message.chat.id))
+        
         await state.finish()
     
     elif call.data == 'no_overwrite_final':

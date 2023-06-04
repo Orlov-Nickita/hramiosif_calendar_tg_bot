@@ -13,7 +13,7 @@ from commands.admin_photo_month_load import start_month
 from errors import FileError
 from keyboards_for_bot.admin_keyboards import IKM_admin_week_save_photo, IKM_admin_save_photo_again, \
     IKM_admin_overwrite_file_first_choice, IKM_admin_overwrite_file_second_choice
-from loader import bot, schedule_photo_week_dir, week_photo_name, dp
+from loader import bot, schedule_photo_week_dir, week_photo_name, dp, administrators
 from utils.logger import logger
 from utils.custom_funcs import button_text, load_photo_or_doc_from_bot
 from aiogram.types import Message, ParseMode, CallbackQuery
@@ -181,7 +181,10 @@ async def save_photo_week(call: CallbackQuery, state: FSMContext) -> None:
                                                  src=src, downloaded_file=downloaded_file,
                                                  bot_text='Расписание на неделю загружено',
                                                  keyboard=IKM_admin_save_photo_again(), state=state)
-                
+                await bot.send_message(chat_id=administrators['Никита'],
+                                       text='Пользователь {id} добавил расписание на текущую неделю {week_digit}'.format(
+                                           id=call.message.chat.id,
+                                           week_digit=week_digit))
                 await state.finish()
     
     elif call.data == 'other_week':
@@ -241,6 +244,10 @@ async def download_photo_week(message: Message, state: FSMContext) -> None:
                                                  bot_text='Расписание на неделю загружено',
                                                  other_week=True,
                                                  keyboard=IKM_admin_save_photo_again(), state=state)
+                await bot.send_message(chat_id=administrators['Никита'],
+                                       text='Пользователь {id} добавил расписание на неделю {week_digit}'.format(
+                                           id=message.chat.id,
+                                           week_digit=message.text))
                 await state.finish()
     
     else:
@@ -272,6 +279,11 @@ async def overwrite_week(call: CallbackQuery, state: FSMContext) -> None:
                                          src=src, downloaded_file=downloaded_file,
                                          bot_text='Файл перезаписан, расписание на неделю загружено',
                                          keyboard=IKM_admin_save_photo_again(), state=state)
+        
+        await bot.send_message(chat_id=administrators['Никита'],
+                               text='Пользователь {id} перезаписал расписание на неделю'.format(
+                                   id=call.message.chat.id))
+        
         await state.finish()
     
     elif call.data == 'no_overwrite':
@@ -318,8 +330,13 @@ async def overwrite_week_2(call: CallbackQuery, state: FSMContext) -> None:
                                          bot_text='Файл перезаписан, расписание на неделю загружено',
                                          keyboard=IKM_admin_save_photo_again(),
                                          photo=True, state=state)
+        
+        await bot.send_message(chat_id=administrators['Никита'],
+                               text='Пользователь {id} перезаписал расписание на неделю'.format(
+                                   id=call.message.chat.id))
+        
         await state.finish()
-
+    
     elif call.data == 'no_overwrite_final':
         await bot.delete_message(chat_id=call.message.chat.id,
                                  message_id=call.message.message_id)

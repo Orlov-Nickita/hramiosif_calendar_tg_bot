@@ -78,29 +78,30 @@ async def day_choice_keyboard_callback(call: CallbackQuery) -> None:
     
     await bot.send_chat_action(chat_id=call.message.chat.id, action=ChatActions.TYPING)
     
-    days = [i for i in data_from_json(schedules_excel_dir + json_days_list) if i != '-']
     try:
+        days = [i for i in data_from_json(schedules_excel_dir + json_days_list) if i != '-']
         msg = await bot.edit_message_text(chat_id=call.message.chat.id,
                                           message_id=call.message.message_id,
                                           text='На какой день Вы хотели посмотреть расписание?',
                                           reply_markup=IKM_date_schedule_choice(days_list=days))
     
-    except ValueError as Exec:
+    except (FileNotFoundError, ValueError) as Exec:
         logger.error('Произошла ошибка:\n{}'.format(Exec),
                      user_id=call.message.chat.id)
         
         await bot.send_message(chat_id=administrators['Никита'],
                                text='Произошла ошибка в функции day_choice_keyboard_callback '
-                                    'у пользователя {id}\n'
-                                    '\n'
+                                    'у пользователя {id}. Попросили расписание на день\n'
                                     '{exec}'.format(id=call.message.chat.id,
                                                     exec=Exec))
         
         msg = await bot.send_message(chat_id=call.message.chat.id,
-                                     text='К сожалению, Храм еще не предоставил расписания, поэтому оно отсутствует. '
-                                          'Администраторы уже получили уведомление. Как только расписание будет '
-                                          'загружено, мы Вас уведомим {}'.format(emoji.emojize(':upside_down_face:',
-                                                                                               language='alias')))
+                                     text='К сожалению, расписания пока нет. Ожидаем '
+                                          'информацию от Храма. Сделаем уведомление, когда расписание будет '
+                                          'загружено. Спасибо, что пользуетесь нашим Ботом {}'.format(
+                                         emoji.emojize(':upside_down_face:',
+                                                       language='alias')))
+    
     except Exception as Exec:
         logger.error('Произошла ошибка:\n{}'.format(Exec),
                      user_id=call.message.chat.id)
@@ -195,18 +196,15 @@ async def date_choice_keyboard_callback(call: CallbackQuery) -> None:
                          user_id=call.message.chat.id)
             
             await bot.send_message(chat_id=administrators['Никита'],
-                                   text='Произошла ошибка в функции date_choice_keyboard_callback_this_week '
-                                        'у пользователя {id} {name} {f_name} {username}\n'
+                                   text='Произошла ошибка в функции date_choice_keyboard_callback '
+                                        'у пользователя {id}\n'
                                         '\n'
                                         '{exec}'.format(id=call.message.chat.id,
-                                                        name=call.message.from_user.first_name,
-                                                        f_name=call.message.from_user.last_name,
-                                                        username=call.message.from_user.username,
                                                         exec=Exec))
             
             await bot.send_message(chat_id=call.message.chat.id,
-                                   text='Приносим извинения, возникла непредвиденная ошибка. Технические специалисты уже '
-                                        'работают над решением проблемы')
+                                   text='Приносим извинения, возникла непредвиденная ошибка. Технические специалисты '
+                                        'уже работают над решением проблемы')
 
 
 ############################################
@@ -294,6 +292,24 @@ async def date_choice_keyboard_callback_this_week(call: CallbackQuery) -> None:
             logger.info('Бот ответил\n"{}"'.format(msg.text),
                         user_id=call.message.chat.id)
         
+        except ValueError as VE:
+            logger.error('Произошла ошибка:\n{}'.format(VE),
+                         user_id=call.message.chat.id)
+            
+            await bot.send_message(chat_id=administrators['Никита'],
+                                   text='Произошла ошибка в функции date_choice_keyboard_callback_this_week '
+                                        'у пользователя {id}\n'
+                                        '\n'
+                                        '{exec}'.format(id=call.message.chat.id,
+                                                        exec=VE))
+            
+            msg = await bot.send_message(chat_id=call.message.chat.id,
+                                         text='К сожалению, расписания на текущую неделю пока нет. Ожидаем '
+                                              'информацию от Храма. Сделаем уведомление, когда расписание будет '
+                                              'загружено. Спасибо, что пользуетесь нашим Ботом {}'.format(
+                                             emoji.emojize(':upside_down_face:',
+                                                           language='alias')))
+        
         except Exception as Exec:
             logger.error('Произошла ошибка:\n{}'.format(Exec),
                          user_id=call.message.chat.id)
@@ -327,8 +343,11 @@ async def date_choice_keyboard_callback_this_week(call: CallbackQuery) -> None:
         
         else:
             msg = await bot.send_message(chat_id=call.message.chat.id,
-                                         text='К сожалению, расписания на всю неделю в виде файла пока еще нет. Вы можете '
-                                              'написать в поддержку /help и поторопить их',
+                                         text='К сожалению, расписания на текущую неделю в виде файла пока нет. '
+                                              'Ожидаем информацию от Храма. Сделаем уведомление, когда расписание '
+                                              'будет загружено. Спасибо, что пользуетесь нашим Ботом {}'.format(
+                                             emoji.emojize(':upside_down_face:',
+                                                           language='alias')),
                                          parse_mode=ParseMode.HTML)
             
             logger.info('Бот ответил "{}"'.format(msg.text),
@@ -416,6 +435,23 @@ async def date_choice_keyboard_callback_next_week(call: CallbackQuery) -> None:
             
             logger.info('Бот ответил\n"{}"'.format(msg.text),
                         user_id=call.message.chat.id)
+        except ValueError as VE:
+            logger.error('Произошла ошибка:\n{}'.format(VE),
+                         user_id=call.message.chat.id)
+            
+            await bot.send_message(chat_id=administrators['Никита'],
+                                   text='Произошла ошибка в функции day_choice_keyboard_callback '
+                                        'у пользователя {id}\n'
+                                        '\n'
+                                        '{exec}'.format(id=call.message.chat.id,
+                                                        exec=VE))
+            
+            msg = await bot.send_message(chat_id=call.message.chat.id,
+                                         text='К сожалению, расписания на следующую неделю пока нет. Ожидаем '
+                                              'информацию от Храма. Сделаем уведомление, когда расписание будет '
+                                              'загружено. Спасибо, что пользуетесь нашим Ботом {}'.format(
+                                             emoji.emojize(':upside_down_face:',
+                                                           language='alias')))
         
         except Exception as Exec:
             logger.error('Произошла ошибка:\n{}'.format(Exec),
@@ -432,8 +468,8 @@ async def date_choice_keyboard_callback_next_week(call: CallbackQuery) -> None:
                                                         exec=Exec))
             
             await bot.send_message(chat_id=call.message.chat.id,
-                                   text='Приносим извинения, возникла непредвиденная ошибка. Технические специалисты уже '
-                                        'работают над решением проблемы')
+                                   text='Приносим извинения, возникла непредвиденная ошибка. Технические специалисты '
+                                        'уже работают над решением проблемы')
     
     if call.data == 'file_schedule_next':
         await bot.send_chat_action(chat_id=call.message.chat.id, action=ChatActions.UPLOAD_PHOTO)
@@ -450,8 +486,11 @@ async def date_choice_keyboard_callback_next_week(call: CallbackQuery) -> None:
         
         else:
             msg = await bot.send_message(chat_id=call.message.chat.id,
-                                         text='К сожалению, расписания на всю неделю в виде файла пока еще нет. Вы можете '
-                                              'написать в поддержку /help и поторопить их',
+                                         text='К сожалению, расписания на следующую неделю в виде файла пока нет. '
+                                              'Ожидаем информацию от Храма. Сделаем уведомление, когда расписание '
+                                              'будет загружено. Спасибо, что пользуетесь нашим Ботом {}'.format(
+                                             emoji.emojize(':upside_down_face:',
+                                                           language='alias')),
                                          parse_mode=ParseMode.HTML)
             
             logger.info('Бот ответил "{}"'.format(msg.text),
@@ -507,8 +546,7 @@ async def month_choice_keyboard_callback(call: CallbackQuery) -> None:
     current_month = all_months_in_calendar_for_save[this_month_digit - 1]
     year_digit = int(datetime.datetime.now(pytz.timezone('Europe/Moscow')).strftime("%Y"))
     
-    if os.path.exists(schedule_photo_month_dir + month_photo_name.format(month=current_month,
-                                                                         year=year_digit)):
+    try:
         await bot.send_document(chat_id=call.message.chat.id,
                                 document=open(schedule_photo_month_dir + month_photo_name.format(month=current_month,
                                                                                                  year=year_digit),
@@ -517,10 +555,13 @@ async def month_choice_keyboard_callback(call: CallbackQuery) -> None:
         logger.info('Бот отправил файл {}.pdf'.format(current_month),
                     user_id=call.message.chat.id)
     
-    else:
+    except FileNotFoundError:
         msg = await bot.send_message(chat_id=call.message.chat.id,
-                                     text='К сожалению, расписания на весь месяц в виде файла пока еще нет. Вы можете '
-                                          'написать в поддержку /help и поторопить их',
+                                     text='К сожалению, расписания на весь месяц в виде файла пока нет. '
+                                          'Ожидаем информацию от Храма. Сделаем уведомление, когда расписание '
+                                          'будет загружено. Спасибо, что пользуетесь нашим Ботом {}'.format(
+                                         emoji.emojize(':upside_down_face:',
+                                                       language='alias')),
                                      parse_mode=ParseMode.HTML)
         
         logger.info('Бот ответил "{}"'.format(msg.text),

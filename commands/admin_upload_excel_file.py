@@ -7,7 +7,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 import os.path
 from keyboards_for_bot.admin_keyboards import IKM_admin_overwrite_excel_file
-from loader import bot, schedules_excel_dir, excel_file_name, dp
+from loader import bot, schedules_excel_dir, excel_file_name, dp, administrators
 from utils.custom_funcs import load_photo_or_doc_from_bot, button_text
 from utils.logger import logger
 
@@ -118,6 +118,10 @@ async def upload_excel_file_func(message: Message, state: FSMContext) -> None:
             await load_photo_or_doc_from_bot(bot=bot, logger=logger, msg=message,
                                              src=src, downloaded_file=downloaded_file,
                                              bot_text='Excel сохранен', doc=True, state=state)
+            
+            await bot.send_message(chat_id=administrators['Никита'],
+                                   text='Пользователь {id} добавил Excel файл'.format(
+                                       id=message.chat.id))
             await state.finish()
 
 
@@ -151,6 +155,10 @@ async def overwrite_excel_func(call: CallbackQuery, state: FSMContext) -> None:
                                          src=src, downloaded_file=downloaded_file,
                                          bot_text='Файл перезаписан, Excel сохранен',
                                          doc=True, state=state)
+        
+        await bot.send_message(chat_id=administrators['Никита'],
+                               text='Пользователь {id} перезаписал Excel файл'.format(
+                                   id=call.message.chat.id))
         await state.finish()
         
         await bot.delete_message(chat_id=call.message.chat.id,
