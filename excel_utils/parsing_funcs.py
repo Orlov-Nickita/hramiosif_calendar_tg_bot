@@ -83,8 +83,8 @@ def find_information_in_file(day: str,
 def day_name(day):
     month_num = all_months_in_calendar.index(day.split()[1])
     date = f'{day.split()[0]} {month_num + 1}'
-    a = datetime.datetime.strptime(date, '%d %m').weekday()
-    
+    a = datetime.datetime.strptime(date, '%d %m').isoweekday()
+
     return week_days[a - 1]
 
 
