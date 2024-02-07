@@ -1,7 +1,6 @@
 name: Deploy iosif bot
 env:
-  # Setting an environment variable with the value of a configuration variable
-  env_var: ${{ vars.ENV_PROD }}
+  env_var: ${{ GITHUB_ENV }}
 on:
   push:
     branches: ["master"]
