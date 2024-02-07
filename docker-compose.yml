@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  python3:
+    container_name: hramiosif_bot
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile

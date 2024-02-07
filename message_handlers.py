@@ -1,7 +1,7 @@
 """
 Модуль со всеми командами, которые может обрабатывать бот
 """
-from commands import c_start, c_help, c_keyboard, admin_panel, t_schedule
+from commands import c_start, c_help, c_keyboard, admin_panel, t_schedule, t_send_qr_code
 from loader import bot, administrators, dp
 from utils.logger import logger
 from aiogram.types import ParseMode, Message
@@ -103,7 +103,13 @@ async def text_func(message: Message) -> None:
     
     if message.text.startswith('Уточнить расписание богослужений'):
         await t_schedule.start(message)
-    
+
+    elif message.text.startswith('Пожертвовать Храму'):
+        await t_send_qr_code.send_qrcode(message)
+
+    # elif message.text.startswith('Задать вопрос священнику'):
+    #     await t_question.start(message)
+    #
     # elif message.text.startswith('Посмотреть календарь'):
         # await send_information.start(message)
     

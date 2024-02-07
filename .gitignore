@@ -134,7 +134,7 @@ dmypy.json
 /hdd/schedules/photos/week/*
 # schedules/
 /.env_christ_token
-/christian_calendar/jsons/christ_api_token.json
 /doc_utils/
-/christian_calendar/
+christian_calendar/
 /hdd/logs/errors.txt
+/christian_calendar/

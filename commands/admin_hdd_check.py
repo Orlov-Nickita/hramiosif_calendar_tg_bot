@@ -17,8 +17,7 @@ async def _get_root_hdd(msg: Message, koren: bool = False, path: bool = False) -
     """
     Декоратор для получения пути директории/файла в БД
     """
-    return await sql_hdd_root_dir_get(sql_base=users_sql_dir + users_sql_file_name,
-                                      message=msg,
+    return await sql_hdd_root_dir_get(message=msg,
                                       koren=koren,
                                       path=path)
 
@@ -27,8 +26,7 @@ async def _update_root_hdd(msg: Message, direc: str, koren: bool = False, path: 
     """
     Декоратор для обновления пути директории/файла в БД
     """
-    await sql_hdd_root_dir_update(sql_base=users_sql_dir + users_sql_file_name,
-                                  root_dir=direc,
+    await sql_hdd_root_dir_update(root_dir=direc,
                                   koren=koren,
                                   path=path,
                                   message=msg)
