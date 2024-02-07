@@ -3,24 +3,18 @@
 """
 
 import os
-
-from aiogram.contrib.middlewares.logging import LoggingMiddleware
-from aiogram.types import BotCommand
 from dotenv import load_dotenv
-from aiogram import Bot
-from aiogram.dispatcher import Dispatcher
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from bot.init_bot import init_bot
 
-from bot.init_bot import get_bot
+bot, dp = init_bot()
+
 
 load_dotenv()
-
 PG_USER = os.getenv("PG_USER")
 PG_PASS = os.getenv("PG_PASS")
 PG_HOST = os.getenv("PG_HOST")
 PG_PORT = os.getenv("PG_PORT")
 PG_NAME = os.getenv("PG_NAME")
-BOT_TOKEN = os.getenv("BOT_TOKEN")
 
 administrators = {'Никита': os.getenv('ADMINISTRATOR_NIKITA_1'),
                   "Nik": os.getenv('ADMINISTRATOR_NIKITA_2'),
@@ -64,5 +58,3 @@ schedules_excel_dir = './hdd/schedules/excel/'
 schedules_photos_dir = './hdd/schedules/photos/'
 schedule_photo_week_dir = './hdd/schedules/photos/week/'
 schedule_photo_month_dir = './hdd/schedules/photos/month/'
-
-bot, dp = get_bot()
