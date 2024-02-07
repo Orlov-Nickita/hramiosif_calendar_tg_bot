@@ -2,20 +2,25 @@ from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.types import BotCommand
+import os
 
-from loader import BOT_TOKEN
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
-def get_bot():
-    bot = Bot(token=BOT_TOKEN)
-
+async def set_commands(bot: Bot):
     commands = [
         BotCommand(command="/start", description="Начать"),
         BotCommand(command="/help", description="Помощь"),
         BotCommand(command="/keyboard ", description="Открыть клавиатуру"),
     ]
+    await bot.set_my_commands(commands)
 
-    bot.set_my_commands(commands)
+
+def init_bot():
+    BOT_TOKEN = os.getenv("BOT_TOKEN")
+    bot = Bot(token=BOT_TOKEN)
     dp = Dispatcher(bot, storage=MemoryStorage())
     dp.middleware.setup(LoggingMiddleware())
 

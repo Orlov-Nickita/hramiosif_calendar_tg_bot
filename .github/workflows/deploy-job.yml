@@ -5,18 +5,10 @@ on:
     branches: ["master"]
 
 jobs:
-  prepare-environment:
-    runs-on: self-hosted
-    steps:
-      - name: Stop and remove containers, networks
-        run: docker-compose down
-      - name: Remove unused data
-        run: docker system prune -a -f
   deploy:
     runs-on: self-hosted
-    needs: prepare-environment
     steps:
       - name: checkout repo
         uses: actions/checkout@v3
-      - name: docker-compose
-        run: docker-compose up -d
+      - name: docker compose
+        run: docker compose -f docker-compose.yml -p mamod_web up --build --force-recreate -d
