@@ -3,6 +3,8 @@
 """
 import logging
 from datetime import datetime
+from logging.handlers import TimedRotatingFileHandler
+
 import pytz
 from loader import log_dir, log_file_name
 
@@ -44,8 +46,14 @@ logging.basicConfig(filename=log_dir + log_file_name,
                            '[num_string %(lineno)d] - '
                            '%(message)s'
                     )
-
 logger = logging.getLogger('logger')
 log_main = logging.getLogger('log_main')
+
+# cd = datetime.now(tz=pytz.timezone('Europe/Moscow')).strftime('%Y-%m-%d')
+# hand = TimedRotatingFileHandler(f'{cd} bot_detail.log', when='midnight', backupCount=0)
+#
+# logger.addHandler(hand)
+# log_main.addHandler(hand)
+
 logger = CustomAdapter(logger, {'username': 'system',
                                 'user_id': 'system'})

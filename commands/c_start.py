@@ -27,9 +27,7 @@ async def start(message: Message) -> None:
                                       'поддержку, нажмите тут /help или выберите соответствующий пункт меню внизу',
                                  reply_markup=RKM_for_the_menu())
     
-    await data_add(sql_base=users_sql_dir + users_sql_file_name,
-                   message=message,
-                   )
+    await data_add(message=message)
     
     logger.info('Бот отправил сообщение\n"{}"'.format(msg.text),
                 user_id=message.chat.id)

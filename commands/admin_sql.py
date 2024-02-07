@@ -32,8 +32,7 @@ async def followers_func(message: Message) -> None:
     
     param message: Сообщение
     """
-    qty_flw = len(await get_info_from_sql_for_followers(sql_base=users_sql_dir + users_sql_file_name,
-                                                        message=message))
+    qty_flw = await get_info_from_sql_for_followers(message=message)
     
     await bot.send_message(chat_id=message.chat.id,
                            text='Число пользователей в боте : <b>{}</b>'.format(qty_flw),
