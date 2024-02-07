@@ -1,6 +1,16 @@
 name: Deploy iosif bot
 env:
-  env_var: ${{ GITHUB_ENV }}
+  BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+  ADMINISTRATOR_NIKITA_1: ${{ secrets.ADMINISTRATOR_NIKITA_1 }}
+  ADMINISTRATOR_NIKITA_2: ${{ secrets.ADMINISTRATOR_NIKITA_2 }}
+  ADMINISTRATOR_SASHA: ${{ secrets.ADMINISTRATOR_SASHA }}
+  ADMINISTRATOR_PASHA: ${{ secrets.ADMINISTRATOR_PASHA }}
+  PG_NAME: ${{ secrets.PG_NAME }}
+  PG_USER: ${{ secrets.PG_USER }}
+  PG_PASS: ${{ secrets.PG_PASS }}
+  PG_HOST: ${{ secrets.PG_HOST }}
+  PG_PORT: ${{ secrets.PG_PORT }}
+
 on:
   push:
     branches: ["master"]
