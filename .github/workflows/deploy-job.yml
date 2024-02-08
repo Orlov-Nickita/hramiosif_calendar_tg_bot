@@ -8,41 +8,21 @@ jobs:
   deploy:
     runs-on: self-hosted
     steps:
-#      - name: checkout repo
-#        uses: actions/checkout@v3
-      - name: docker compose
-        env:
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          ADMINISTRATOR_NIKITA_1: ${{ secrets.ADMINISTRATOR_NIKITA_1 }}
-          ADMINISTRATOR_NIKITA_2: ${{ secrets.ADMINISTRATOR_NIKITA_2 }}
-          ADMINISTRATOR_SASHA: ${{ secrets.ADMINISTRATOR_SASHA }}
-          ADMINISTRATOR_PASHA: ${{ secrets.ADMINISTRATOR_PASHA }}
-          PG_NAME: ${{ secrets.PG_NAME }}
-          PG_USER: ${{ secrets.PG_USER }}
-          PG_PASS: ${{ secrets.PG_PASS }}
-          PG_HOST: ${{ secrets.PG_HOST }}
-          PG_PORT: ${{ secrets.PG_PORT }}
-        run: docker compose -f docker-compose.yml -p mamod_web up --build --force-recreate -d
-      - name: Get secret from base64
-        env:
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          ADMINISTRATOR_NIKITA_1: ${{ secrets.ADMINISTRATOR_NIKITA_1 }}
-          ADMINISTRATOR_NIKITA_2: ${{ secrets.ADMINISTRATOR_NIKITA_2 }}
-          ADMINISTRATOR_SASHA: ${{ secrets.ADMINISTRATOR_SASHA }}
-          ADMINISTRATOR_PASHA: ${{ secrets.ADMINISTRATOR_PASHA }}
-          PG_NAME: ${{ secrets.PG_NAME }}
-          PG_USER: ${{ secrets.PG_USER }}
-          PG_PASS: ${{ secrets.PG_PASS }}
-          PG_HOST: ${{ secrets.PG_HOST }}
-          PG_PORT: ${{ secrets.PG_PORT }}
+      - name: checkout repo
+        uses: actions/checkout@v3
+      - name: 'Create env file'
         run: |
-          echo $BOT_TOKEN >> $GITHUB_ENV
-          echo $ADMINISTRATOR_NIKITA_1 >> $GITHUB_ENV
-          echo $ADMINISTRATOR_NIKITA_2 >> $GITHUB_ENV
-          echo $ADMINISTRATOR_SASHA >> $GITHUB_ENV
-          echo $ADMINISTRATOR_PASHA >> $GITHUB_ENV
-          echo $PG_NAME >> $GITHUB_ENV
-          echo $PG_USER >> $GITHUB_ENV
-          echo $PG_PASS >> $GITHUB_ENV
-          echo $PG_HOST >> $GITHUB_ENV
-          echo $PG_PORT >> $GITHUB_ENV
+          touch .env
+          echo BOT_TOKEN=${{ secrets.BOT_TOKEN }} > .env
+          echo ADMINISTRATOR_NIKITA_1=${{ secrets.ADMINISTRATOR_NIKITA_1 }} > .env
+          echo ADMINISTRATOR_NIKITA_2=${{ secrets.ADMINISTRATOR_NIKITA_2 }} > .env
+          echo ADMINISTRATOR_SASHA=${{ secrets.ADMINISTRATOR_SASHA }} > .env
+          echo ADMINISTRATOR_PASHA=${{ secrets.ADMINISTRATOR_PASHA }} > .env
+          echo PG_NAME=${{ secrets.PG_NAME }} > .env
+          echo PG_USER=${{ secrets.PG_USER }} > .env
+          echo PG_PASS=${{ secrets.PG_PASS }} > .env
+          echo PG_HOST=${{ secrets.PG_HOST }} > .env
+          echo PG_PORT=${{ secrets.PG_PORT }} > .env
+          cat .env
+      - name: docker compose
+        run: docker compose -f docker-compose.yml -p mamod_web up --build --force-recreate -d
