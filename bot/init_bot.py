@@ -2,11 +2,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.types import BotCommand
-import os
-
-from dotenv import load_dotenv
-
-load_dotenv()
+from decouple import config
 
 
 async def set_commands(bot: Bot):
@@ -19,7 +15,7 @@ async def set_commands(bot: Bot):
 
 
 def init_bot():
-    BOT_TOKEN = os.environ["BOT_TOKEN"]
+    BOT_TOKEN = config("BOT_TOKEN")
     bot = Bot(token=BOT_TOKEN)
     dp = Dispatcher(bot, storage=MemoryStorage())
     dp.middleware.setup(LoggingMiddleware())
