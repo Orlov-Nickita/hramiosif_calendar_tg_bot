@@ -13,16 +13,16 @@ jobs:
       - name: 'Create env file'
         run: |
           touch .env
-          echo BOT_TOKEN=${{ secrets.BOT_TOKEN }} > .env
-          echo ADMINISTRATOR_NIKITA_1=${{ secrets.ADMINISTRATOR_NIKITA_1 }} > .env
-          echo ADMINISTRATOR_NIKITA_2=${{ secrets.ADMINISTRATOR_NIKITA_2 }} > .env
-          echo ADMINISTRATOR_SASHA=${{ secrets.ADMINISTRATOR_SASHA }} > .env
-          echo ADMINISTRATOR_PASHA=${{ secrets.ADMINISTRATOR_PASHA }} > .env
-          echo PG_NAME=${{ secrets.PG_NAME }} > .env
-          echo PG_USER=${{ secrets.PG_USER }} > .env
-          echo PG_PASS=${{ secrets.PG_PASS }} > .env
-          echo PG_HOST=${{ secrets.PG_HOST }} > .env
-          echo PG_PORT=${{ secrets.PG_PORT }} > .env
+          echo BOT_TOKEN=${{ secrets.BOT_TOKEN }} >> .env
+          echo ADMINISTRATOR_NIKITA_1=${{ secrets.ADMINISTRATOR_NIKITA_1 }} >> .env
+          echo ADMINISTRATOR_NIKITA_2=${{ secrets.ADMINISTRATOR_NIKITA_2 }} >> .env
+          echo ADMINISTRATOR_SASHA=${{ secrets.ADMINISTRATOR_SASHA }} >> .env
+          echo ADMINISTRATOR_PASHA=${{ secrets.ADMINISTRATOR_PASHA }} >> .env
+          echo PG_NAME=${{ secrets.PG_NAME }} >> .env
+          echo PG_USER=${{ secrets.PG_USER }} >> .env
+          echo PG_PASS=${{ secrets.PG_PASS }} >> .env
+          echo PG_HOST=${{ secrets.PG_HOST }} >> .env
+          echo PG_PORT=${{ secrets.PG_PORT }} >> .env
           cat .env
       - name: docker compose
         run: docker compose -f docker-compose.yml -p mamod_web up --build --force-recreate -d
