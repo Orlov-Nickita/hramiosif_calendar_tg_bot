@@ -1,23 +1,24 @@
 """
 Модуль с некоторыми данными, хранящимися в переменных
 """
-from decouple import config
+import os
+
 from dotenv import load_dotenv
 from bot.init_bot import init_bot
 
 bot, dp = init_bot()
 
 load_dotenv()
-PG_USER = config("PG_USER")
-PG_PASS = config("PG_PASS")
-PG_HOST = config("PG_HOST")
-PG_PORT = config("PG_PORT")
-PG_NAME = config("PG_NAME")
+PG_USER = os.getenv("PG_USER")
+PG_PASS = os.getenv("PG_PASS")
+PG_HOST = os.getenv("PG_HOST")
+PG_PORT = os.getenv("PG_PORT")
+PG_NAME = os.getenv("PG_NAME")
 
-administrators = {'Никита': config('ADMINISTRATOR_NIKITA_1'),
-                  "Nik": config('ADMINISTRATOR_NIKITA_2'),
-                  'Саша': config('ADMINISTRATOR_SASHA'),
-                  'Паша': config('ADMINISTRATOR_PASHA')}
+administrators = {'Никита': os.getenv('ADMINISTRATOR_NIKITA_1'),
+                  "Nik": os.getenv('ADMINISTRATOR_NIKITA_2'),
+                  'Саша': os.getenv('ADMINISTRATOR_SASHA'),
+                  'Паша': os.getenv('ADMINISTRATOR_PASHA')}
 
 all_months_in_calendar = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
                           'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
