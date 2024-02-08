@@ -31,8 +31,5 @@ jobs:
         run: echo ${{ secrets.BOT_TOKEN }}
       - name: asd
         run: echo ${{ env.BOT_TOKEN }}
-      - name: asd
-        run: echo ${{ BOT_TOKEN }}
-      - name: asd
-        run: echo $BOT_TOKEN
+
 
