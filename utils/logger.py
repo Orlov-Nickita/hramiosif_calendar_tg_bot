@@ -7,6 +7,7 @@ from logging.handlers import TimedRotatingFileHandler
 
 import pytz
 from loader import log_dir, log_file_name
+import os
 
 
 class CustomAdapter(logging.LoggerAdapter):
@@ -15,7 +16,7 @@ class CustomAdapter(logging.LoggerAdapter):
     None, но когда мы ведем журнал событий, то можем переопределить их исходя уже из информации о конкретном
     Пользователе
     """
-    
+
     def process(self, log_message: str, user_dict_info: dict) -> tuple:
         """
         Функция, которая добавляет нужную информацию о Пользователе в строку журнала событий
@@ -27,7 +28,7 @@ class CustomAdapter(logging.LoggerAdapter):
         :return: Возвращается дополненное информацией о Пользователе сообщение логгера
         :rtype: tuple
         """
-        
+
         username = user_dict_info.pop('username', self.extra['username'])
         user_id = user_dict_info.pop('user_id', self.extra['user_id'])
         return '[username %s] - ' \
@@ -35,6 +36,8 @@ class CustomAdapter(logging.LoggerAdapter):
                '[%s]' % (username, user_id, log_message), user_dict_info
 
 
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
 logging.Formatter.converter = lambda *args: datetime.now(tz=pytz.timezone('Europe/Moscow')).timetuple()
 logging.basicConfig(filename=log_dir + log_file_name,
                     level=logging.INFO,
