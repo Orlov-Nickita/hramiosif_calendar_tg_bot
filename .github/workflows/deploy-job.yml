@@ -10,5 +10,8 @@ jobs:
     steps:
       - name: checkout repo
         uses: actions/checkout@v3
+        with:
+          clean: 'false'
+
       - name: docker compose
         run: docker compose -f docker-compose.yml up --build --force-recreate -d
