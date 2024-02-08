@@ -9,5 +9,5 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    volumes:
-      - /home/orlow/hram:/app/hdd
+#    volumes:
+#      - /home/orlow/hram:/app/hdd
