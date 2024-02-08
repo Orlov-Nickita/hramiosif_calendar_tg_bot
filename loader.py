@@ -3,15 +3,8 @@
 """
 
 import os
-
-from aiogram.contrib.middlewares.logging import LoggingMiddleware
-from aiogram.types import BotCommand
 from dotenv import load_dotenv
-from aiogram import Bot
-from aiogram.dispatcher import Dispatcher
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
-
-from bot.init_bot import get_bot
+from bot.init_bot import init_bot
 
 load_dotenv()
 
@@ -65,4 +58,4 @@ schedules_photos_dir = './hdd/schedules/photos/'
 schedule_photo_week_dir = './hdd/schedules/photos/week/'
 schedule_photo_month_dir = './hdd/schedules/photos/month/'
 
-bot, dp = get_bot()
+bot, dp = init_bot()
