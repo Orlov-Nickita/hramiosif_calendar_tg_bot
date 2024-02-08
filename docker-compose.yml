@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   python3:
-    container_name: hramiosif_bot
+    container_name: hram_bot
     restart: always
     env_file:
       - /home/orlow/hram/.env

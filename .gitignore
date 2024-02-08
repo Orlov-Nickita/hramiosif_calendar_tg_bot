@@ -132,10 +132,7 @@ dmypy.json
 /hdd/schedules/excel/*
 /hdd/schedules/photos/month/*
 /hdd/schedules/photos/week/*
-# schedules/
-/.env_christ_token
 /doc_utils/
-christian_calendar/
 /hdd/logs/errors.txt
 /christian_calendar/
 /commands/admin_get_questions_from_bot.py
