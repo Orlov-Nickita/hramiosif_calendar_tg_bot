@@ -10,4 +10,4 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
-      - /home/orlow/hram:/hdd
+      - /home/orlow/hram:/app/hdd

@@ -138,3 +138,5 @@ dmypy.json
 christian_calendar/
 /hdd/logs/errors.txt
 /christian_calendar/
+/commands/admin_get_questions_from_bot.py
+/commands/t_question.py
