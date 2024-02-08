@@ -43,7 +43,7 @@ class DataBase:
         with self.engine.connect() as conn:
             user_raw: ResultProxy = conn.execute(
                 select(self.table_bot_users)
-                .where(self.table_bot_users.c.id == user_id)
+                .where(self.table_bot_users.c.user_id == user_id)
             )
             return self.__to_dict(user_raw, one=True)
 
