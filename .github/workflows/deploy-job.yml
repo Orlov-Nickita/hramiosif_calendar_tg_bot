@@ -19,10 +19,16 @@ jobs:
       PG_PORT: ${{ vars.PG_PORT }}
     runs-on: self-hosted
     steps:
-      - name: checkout repo
-        uses: actions/checkout@v3
-      - name: docker compose
-        run: docker compose -f docker-compose.yml -p mamod_web up --build --force-recreate -d
+#      - name: checkout repo
+#        uses: actions/checkout@v3
+#      - name: docker compose
+#        run: docker compose -f docker-compose.yml -p mamod_web up --build --force-recreate -d
       - name: aqqwe
         run: echo $GITHUB_ENV
+      - name: asd
+        run: echo ${{ vars.BOT_TOKEN }}
+      - name: asd
+        run: echo ${{ secrets.BOT_TOKEN }}
+      - name: asd
+        run: echo ${{ env.BOT_TOKEN }}
 
