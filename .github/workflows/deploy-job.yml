@@ -7,16 +7,16 @@ on:
 jobs:
   deploy:
     env:
-      BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-      ADMINISTRATOR_NIKITA_1: ${{ secrets.ADMINISTRATOR_NIKITA_1 }}
-      ADMINISTRATOR_NIKITA_2: ${{ secrets.ADMINISTRATOR_NIKITA_2 }}
-      ADMINISTRATOR_SASHA: ${{ secrets.ADMINISTRATOR_SASHA }}
-      ADMINISTRATOR_PASHA: ${{ secrets.ADMINISTRATOR_PASHA }}
-      PG_NAME: ${{ secrets.PG_NAME }}
-      PG_USER: ${{ secrets.PG_USER }}
-      PG_PASS: ${{ secrets.PG_PASS }}
-      PG_HOST: ${{ secrets.PG_HOST }}
-      PG_PORT: ${{ secrets.PG_PORT }}
+      BOT_TOKEN: ${{ vars.BOT_TOKEN }}
+      ADMINISTRATOR_NIKITA_1: ${{ vars.ADMINISTRATOR_NIKITA_1 }}
+      ADMINISTRATOR_NIKITA_2: ${{ vars.ADMINISTRATOR_NIKITA_2 }}
+      ADMINISTRATOR_SASHA: ${{ vars.ADMINISTRATOR_SASHA }}
+      ADMINISTRATOR_PASHA: ${{ vars.ADMINISTRATOR_PASHA }}
+      PG_NAME: ${{ vars.PG_NAME }}
+      PG_USER: ${{ vars.PG_USER }}
+      PG_PASS: ${{ vars.PG_PASS }}
+      PG_HOST: ${{ vars.PG_HOST }}
+      PG_PORT: ${{ vars.PG_PORT }}
     runs-on: self-hosted
     steps:
       - name: checkout repo
