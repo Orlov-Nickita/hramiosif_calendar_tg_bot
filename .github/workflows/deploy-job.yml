@@ -49,14 +49,13 @@ jobs:
           PG_HOST: ${{ secrets.PG_HOST }}
           PG_PORT: ${{ secrets.PG_PORT }}
         run: |
-          echo import certificate from secrets and regenerate the file
-          echo $BOT_TOKEN > $RUNNER_TEMP/.env
-          echo $ADMINISTRATOR_NIKITA_1 > $RUNNER_TEMP/.env
-          echo $ADMINISTRATOR_NIKITA_2 > $RUNNER_TEMP/.env
-          echo $ADMINISTRATOR_SASHA > $RUNNER_TEMP/.env
-          echo $ADMINISTRATOR_PASHA > $RUNNER_TEMP/.env
-          echo $PG_NAME > $RUNNER_TEMP/.env
-          echo $PG_USER > $RUNNER_TEMP/.env
-          echo $PG_PASS > $RUNNER_TEMP/.env
-          echo $PG_HOST > $RUNNER_TEMP/.env
-          echo $PG_PORT > $RUNNER_TEMP/.env
+          echo $BOT_TOKEN
+          echo $ADMINISTRATOR_NIKITA_1
+          echo $ADMINISTRATOR_NIKITA_2
+          echo $ADMINISTRATOR_SASHA
+          echo $ADMINISTRATOR_PASHA
+          echo $PG_NAME
+          echo $PG_USER
+          echo $PG_PASS
+          echo $PG_HOST
+          echo $PG_PORT
