@@ -15,6 +15,7 @@ async def on_startup(dispatcher, url=None, cert=None):
     commands = [
         BotCommand(command="/start", description="Начать"),
         BotCommand(command="/help", description="Помощь"),
+        BotCommand(command="/admin", description="Админ-панель"),
         BotCommand(command="/keyboard ", description="Открыть клавиатуру"),
     ]
 
