@@ -9,16 +9,16 @@ from bot.init_bot import init_bot
 bot, dp = init_bot()
 
 load_dotenv()
-PG_USER = os.getenv("PG_USER")
-PG_PASS = os.getenv("PG_PASS")
-PG_HOST = os.getenv("PG_HOST")
-PG_PORT = os.getenv("PG_PORT")
-PG_NAME = os.getenv("PG_NAME")
+PG_USER = os.environ["PG_USER"]
+PG_PASS = os.environ["PG_PASS"]
+PG_HOST = os.environ["PG_HOST"]
+PG_PORT = os.environ["PG_PORT"]
+PG_NAME = os.environ["PG_NAME"]
 
-administrators = {'Никита': os.getenv('ADMINISTRATOR_NIKITA_1'),
-                  "Nik": os.getenv('ADMINISTRATOR_NIKITA_2'),
-                  'Саша': os.getenv('ADMINISTRATOR_SASHA'),
-                  'Паша': os.getenv('ADMINISTRATOR_PASHA')}
+administrators = {'Никита': os.environ['ADMINISTRATOR_NIKITA_1'],
+                  "Nik": os.environ['ADMINISTRATOR_NIKITA_2'],
+                  'Саша': os.environ['ADMINISTRATOR_SASHA'],
+                  'Паша': os.environ['ADMINISTRATOR_PASHA']}
 
 all_months_in_calendar = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
                           'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря']
