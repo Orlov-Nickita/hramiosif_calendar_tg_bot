@@ -4,15 +4,21 @@
 
 import os.path
 
+from aiogram.types import BotCommand
 from aiogram.utils.executor import start_polling
-from bot.init_bot import set_commands
-from loader import log_dir, schedules_main_dir, users_sql_dir, bot, dp
+from loader import log_dir, schedules_main_dir, users_sql_dir
 from utils.logger import log_main
 from message_handlers import *
 
 
 async def on_startup(dispatcher, url=None, cert=None):
-    await set_commands(bot)
+    commands = [
+        BotCommand(command="/start", description="Начать"),
+        BotCommand(command="/help", description="Помощь"),
+        BotCommand(command="/keyboard ", description="Открыть клавиатуру"),
+    ]
+
+    await bot.set_my_commands(commands)
     logger.info("Starting connection")
 
 
