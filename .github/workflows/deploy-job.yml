@@ -23,19 +23,6 @@ jobs:
           PG_HOST: ${{ secrets.PG_HOST }}
           PG_PORT: ${{ secrets.PG_PORT }}
         run: docker compose -f docker-compose.yml -p mamod_web up --build --force-recreate -d
-      - name: asd
-        env:
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-          ADMINISTRATOR_NIKITA_1: ${{ secrets.ADMINISTRATOR_NIKITA_1 }}
-          ADMINISTRATOR_NIKITA_2: ${{ secrets.ADMINISTRATOR_NIKITA_2 }}
-          ADMINISTRATOR_SASHA: ${{ secrets.ADMINISTRATOR_SASHA }}
-          ADMINISTRATOR_PASHA: ${{ secrets.ADMINISTRATOR_PASHA }}
-          PG_NAME: ${{ secrets.PG_NAME }}
-          PG_USER: ${{ secrets.PG_USER }}
-          PG_PASS: ${{ secrets.PG_PASS }}
-          PG_HOST: ${{ secrets.PG_HOST }}
-          PG_PORT: ${{ secrets.PG_PORT }}
-        run: echo ${{ secrets.BOT_TOKEN }}
       - name: Get secret from base64
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
@@ -49,13 +36,13 @@ jobs:
           PG_HOST: ${{ secrets.PG_HOST }}
           PG_PORT: ${{ secrets.PG_PORT }}
         run: |
-          echo $BOT_TOKEN
-          echo $ADMINISTRATOR_NIKITA_1
-          echo $ADMINISTRATOR_NIKITA_2
-          echo $ADMINISTRATOR_SASHA
-          echo $ADMINISTRATOR_PASHA
-          echo $PG_NAME
-          echo $PG_USER
-          echo $PG_PASS
-          echo $PG_HOST
-          echo $PG_PORT
+          echo $BOT_TOKEN >> $GITHUB_ENV
+          echo $ADMINISTRATOR_NIKITA_1 >> $GITHUB_ENV
+          echo $ADMINISTRATOR_NIKITA_2 >> $GITHUB_ENV
+          echo $ADMINISTRATOR_SASHA >> $GITHUB_ENV
+          echo $ADMINISTRATOR_PASHA >> $GITHUB_ENV
+          echo $PG_NAME >> $GITHUB_ENV
+          echo $PG_USER >> $GITHUB_ENV
+          echo $PG_PASS >> $GITHUB_ENV
+          echo $PG_HOST >> $GITHUB_ENV
+          echo $PG_PORT >> $GITHUB_ENV
