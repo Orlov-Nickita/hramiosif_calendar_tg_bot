@@ -15,7 +15,7 @@ async def set_commands(bot: Bot):
 
 
 def init_bot():
-    BOT_TOKEN = os.getenv("BOT_TOKEN")
+    BOT_TOKEN = os.environ["BOT_TOKEN"]
     bot = Bot(token=BOT_TOKEN)
     dp = Dispatcher(bot, storage=MemoryStorage())
     dp.middleware.setup(LoggingMiddleware())
