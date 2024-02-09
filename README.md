@@ -1,4 +1,6 @@
-###### Версия бота 1.31:
+[![Deploy iosif bot](https://github.com/Orlov-Nickita/hramiosif_calendar_tg_bot/actions/workflows/deploy-job.yml/badge.svg?branch=master)](https://github.com/Orlov-Nickita/hramiosif_calendar_tg_bot/actions/workflows/deploy-job.yml)
+
+###### Версия бота 1.4:
 
 # Общее описание бота
 
