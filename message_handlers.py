@@ -104,7 +104,7 @@ async def text_func(message: Message) -> None:
     if message.text.startswith('Уточнить расписание богослужений'):
         await t_schedule.start(message)
 
-    elif message.text.startswith('Пожертвовать Храму'):
+    elif message.text.startswith('Пожертвовать храму'):
         await t_send_qr_code.send_qrcode(message)
 
     # elif message.text.startswith('Задать вопрос священнику'):

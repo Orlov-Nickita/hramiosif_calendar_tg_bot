@@ -20,10 +20,7 @@ def RKM_for_the_menu() -> ReplyKeyboardMarkup:
                             language='alias')
     ))
 
-    button2 = KeyboardButton('Пожертвовать Храму {emoji}'.format(
-        emoji=emoji.emojize(':money_bag:',
-                            language='alias')
-    ))
+    button2 = KeyboardButton('Пожертвовать храму')
 
     # button2 = KeyboardButton('Задать вопрос священнику {emoji}'.format(
     #     emoji=emoji.emojize(':red_question_mark:',
