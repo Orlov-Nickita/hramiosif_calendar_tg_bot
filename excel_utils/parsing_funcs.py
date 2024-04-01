@@ -1,6 +1,7 @@
 """
 Модуль с функциями для обработки информации из файлов, полученных после распаковки файла Excel
 """
+import pytz
 
 from excel_utils.open_check_funcs import data_from_json
 from loader import schedules_excel_dir, json_days_list, json_saints, json_timing, \
@@ -81,11 +82,11 @@ def find_information_in_file(day: str,
 
 
 def day_name(day):
+    day_num = day.split()[0]
     month_num = all_months_in_calendar.index(day.split()[1])
-    date = f'{day.split()[0]} {month_num + 1}'
-    a = datetime.datetime.strptime(date, '%d %m').isoweekday()
-
-    return week_days[a - 1]
+    now = datetime.datetime.now(tz=pytz.timezone('Europe/Moscow'))
+    date_ = datetime.datetime(now.year, int(month_num + 1), int(day_num))
+    return week_days[date_.isoweekday() - 1]
 
 
 def schedule_for_a_specific_day(day: str, username: str, user_id: int) -> str:
