@@ -1,7 +1,15 @@
-from typing import Dict, Union, List, Callable
+from typing import Dict, Union, List, Callable, TypedDict
 from sqlalchemy import select
 from sqlalchemy.engine import ResultProxy
 
+
+class UserModel(TypedDict):
+    id: int
+    user_id: int
+    created_at: str
+    first_name: str
+    last_name: str
+    username: str
 
 class DataBase:
     """
@@ -59,6 +67,16 @@ class DataBase:
                     **values
                 )
             )
+
+    def get_all_users_from_db(self) -> List[UserModel]:
+        """
+        Выдает все записи из БД
+        """
+        with self.engine.connect() as conn:
+            users_raw: ResultProxy = conn.execute(
+                select(self.table_bot_users)
+            )
+            return self.__to_dict(users_raw)
 
     def user_all_qty_in_db(self) -> Callable[[], int]:
         """
