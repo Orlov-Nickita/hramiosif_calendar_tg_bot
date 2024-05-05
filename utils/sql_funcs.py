@@ -58,7 +58,6 @@ async def get_info_from_sql_for_followers(message: Message) -> int:
                 user_id=message.chat.id)
 
     date_msg = datetime.datetime.today().strftime("%d.%m.%Y")
-    all_qty = 0
     try:
         all_qty = db.user_all_qty_in_db()
 
@@ -80,7 +79,8 @@ async def get_info_from_sql_for_followers(message: Message) -> int:
                                                         f_name=message.from_user.last_name,
                                                         username=message.from_user.username))
 
-    return all_qty
+    else:
+        return all_qty
 
 
 async def sql_hdd_root_dir_get(message: Message, koren: bool = False, path: bool = False) -> str:
