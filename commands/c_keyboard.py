@@ -14,13 +14,8 @@ async def start(message: Message) -> None:
     :param message: Принимается сообщение от пользователя.
     :return: Возвращается приветственное сообщение и открывается меню бота с клавиатурой.
     """
-    logger.info('Запущена функция c_keyboard.start',
-                username=message.from_user.username,
-                user_id=message.chat.id)
-    
-    msg = await bot.send_message(chat_id=message.chat.id,
-                                 text='Клавиатура открыта',
-                                 reply_markup=RKM_for_the_menu())
-    
-    logger.info('Бот отправил сообщение "{}"'.format(msg.text),
-                user_id=message.chat.id)
+    logger.info("Запущена функция c_keyboard.start", username=message.from_user.username, user_id=message.chat.id)
+
+    msg = await bot.send_message(chat_id=message.chat.id, text="Клавиатура открыта", reply_markup=RKM_for_the_menu())
+
+    logger.info('Бот отправил сообщение "{}"'.format(msg.text), user_id=message.chat.id)

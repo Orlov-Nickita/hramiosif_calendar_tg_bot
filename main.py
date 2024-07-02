@@ -30,21 +30,20 @@ async def on_shutdown(dispatcher):
     logger.info("Closing connection")
 
 
-if __name__ == '__main__':
-    print('ok')
-
+if __name__ == "__main__":
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
-        log_main.info('Создана папка logs')
+        log_main.info("Создана папка logs")
 
     if not os.path.exists(schedules_main_dir):
         os.makedirs(schedules_main_dir)
-        log_main.info('Создана папка schedules')
+        log_main.info("Создана папка schedules")
 
     if not os.path.exists(users_sql_dir):
         os.makedirs(users_sql_dir)
-        log_main.info('Создана папка sql')
+        log_main.info("Создана папка sql")
 
-    log_main.info('Бот запущен')
+    log_main.info("Бот запущен")
+    print("started")
 
     start_polling(dp, on_startup=on_startup, on_shutdown=on_shutdown, skip_updates=True)

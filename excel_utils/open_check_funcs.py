@@ -1,6 +1,7 @@
 """
 Модуль с функциями для работы с Excel файлом и для записи данных в JSON
 """
+
 import json
 import pandas as pd
 from loader import all_months_in_calendar, bot, administrators
@@ -12,18 +13,18 @@ def remove_timestamp_from_dataframe(dt):
     """
     Вспомогательная функция для очистки всех Timestamp из Excel файла после переноса в DataFrame в Pandas
     """
-    if dt != '-':
-        if 'strftime' not in dir(dt):
-            dt = dt.split(' ')
+    if dt != "-":
+        if "strftime" not in dir(dt):
+            dt = dt.split(" ")
             if len(dt[0]) == 1:
-                return f'0{dt[0]} {dt[1]}'
-            
-            return f'{dt[0]} {dt[1]}'
-        
-        return dt.strftime('%d {}'.format(all_months_in_calendar[int(dt.strftime('%m')) - 1]))
-    
+                return f"0{dt[0]} {dt[1]}"
+
+            return f"{dt[0]} {dt[1]}"
+
+        return dt.strftime("%d {}".format(all_months_in_calendar[int(dt.strftime("%m")) - 1]))
+
     else:
-        return '-'
+        return "-"
 
 
 async def open_to_dict(excel_file: str, message: Message) -> dict:
@@ -34,33 +35,39 @@ async def open_to_dict(excel_file: str, message: Message) -> dict:
     """
     new_ex_f = pd.read_excel(excel_file)
     data_from_excel = pd.DataFrame(new_ex_f)
-    data_from_excel.replace({pd.NaT: '-'}, inplace=True)
-    
+    data_from_excel.replace({pd.NaT: "-"}, inplace=True)
+
     try:
-        data_from_excel['Дата'] = data_from_excel['Дата'].apply(remove_timestamp_from_dataframe)
-    
+        data_from_excel["Дата"] = data_from_excel["Дата"].apply(remove_timestamp_from_dataframe)
+
     except Exception as Exec:
-        await bot.send_message(chat_id=message.chat.id,
-                               text='Произошла ошибка прочтения файла. Скорее всего некорректно внесена дата '
-                                    'в ячейки, либо шапка таблицы отсутствует, либо нет слова Дата')
-        
-        logger.error('Произошла ошибка:\n{}'.format(Exec))
-        
-        await bot.send_message(chat_id=administrators['Никита'],
-                               text=f'Произошла ошибка в функции open_to_dict\n'
-                                    f'\n'
-                                    f'Произошла ошибка прочтения файла. Скорее всего некорректно внесена дата '
-                                    'в ячейки, либо шапка таблицы отсутствует, либо нет слова Дата '
-                                    'у пользователя {id} {name} {f_name} {username}\n'
-                                    '\n'
-                                    '{exec}'.format(id=message.chat.id,
-                                                    name=message.from_user.first_name,
-                                                    f_name=message.from_user.last_name,
-                                                    username=message.from_user.username,
-                                                    exec=Exec))
-        
+        await bot.send_message(
+            chat_id=message.chat.id,
+            text="Произошла ошибка прочтения файла. Скорее всего некорректно внесена дата "
+            "в ячейки, либо шапка таблицы отсутствует, либо нет слова Дата",
+        )
+
+        logger.error("Произошла ошибка:\n{}".format(Exec))
+
+        await bot.send_message(
+            chat_id=administrators["Никита"],
+            text=f"Произошла ошибка в функции open_to_dict\n"
+            f"\n"
+            f"Произошла ошибка прочтения файла. Скорее всего некорректно внесена дата "
+            "в ячейки, либо шапка таблицы отсутствует, либо нет слова Дата "
+            "у пользователя {id} {name} {f_name} {username}\n"
+            "\n"
+            "{exec}".format(
+                id=message.chat.id,
+                name=message.from_user.first_name,
+                f_name=message.from_user.last_name,
+                username=message.from_user.username,
+                exec=Exec,
+            ),
+        )
+
         exit()
-    
+
     else:
         return data_from_excel.to_dict()
 
@@ -71,7 +78,7 @@ def data_to_json(json_file: str, data_dict_or_list: dict or list) -> None:
     param json_file: Имя или путь+имя файла куда будет запись
     param data_dict_or_list: Словарь / список
     """
-    with open(json_file, 'w', encoding="utf-8") as temp_f:
+    with open(json_file, "w", encoding="utf-8") as temp_f:
         json.dump(data_dict_or_list, temp_f, indent=4, ensure_ascii=False)
 
 
@@ -80,7 +87,7 @@ def data_from_json(json_file: str) -> dict or list:
     Функция выгружает из файла JSON всю информацию
     param json_file: Файл, из которого надо загрузить информацию
     """
-    with open(json_file, 'r', encoding='utf-8') as temp_k:
+    with open(json_file, "r", encoding="utf-8") as temp_k:
         js_dict = temp_k.read()
     return json.loads(js_dict)
 
@@ -109,7 +116,7 @@ def reversed_dict_days_and_row_index(i_dict: dict):
     days_and_ind = {}
     for key in i_dict:
         if key == [key_j for key_j in i_dict.keys()][0]:
-            days_and_ind = {value: int(key_2) for key_2, value in i_dict[key].items() if value != '-'}
+            days_and_ind = {value: int(key_2) for key_2, value in i_dict[key].items() if value != "-"}
     return days_and_ind
 
 
@@ -127,7 +134,7 @@ def to_lists_of_column(excel_dict: dict) -> tuple:
                 saint_col.append(excel_dict[key_i][index])
             elif key_i == [key_j for key_j in excel_dict.keys()][2]:
                 sch_col.append(excel_dict[key_i][index])
-    
+
     return date_col, saint_col, sch_col
 
 

@@ -11,6 +11,7 @@ class UserModel(TypedDict):
     last_name: str
     username: str
 
+
 class DataBase:
     """
     Класс для настройки работы с Базой данных
@@ -22,9 +23,7 @@ class DataBase:
         self.table_admin_hdd_roots = table_admin_hdd_roots
 
     @staticmethod
-    def __to_dict(
-            model: ResultProxy, one: bool = False
-    ) -> Union[List[Dict], Dict, bool]:
+    def __to_dict(model: ResultProxy, one: bool = False) -> Union[List[Dict], Dict, bool]:
         """
         Преобразует полученные данные из базы данных в словарь с названиями полей в качестве ключей для удобства
         работы с данными. Параметр one используется для случаев, когда получаем одну запись из БД
@@ -34,9 +33,7 @@ class DataBase:
 
         if not one:
             for i_m in model.fetchall():
-                model_dict.append(
-                    dict(zip(columns, i_m))
-                )
+                model_dict.append(dict(zip(columns, i_m)))
             return model_dict
 
         try:
@@ -50,8 +47,7 @@ class DataBase:
         """
         with self.engine.connect() as conn:
             user_raw: ResultProxy = conn.execute(
-                select(self.table_bot_users)
-                .where(self.table_bot_users.c.user_id == user_id)
+                select(self.table_bot_users).where(self.table_bot_users.c.user_id == user_id)
             )
             return self.__to_dict(user_raw, one=True)
 
@@ -60,22 +56,14 @@ class DataBase:
         Создаем запись
         """
         with self.engine.connect() as conn:
-            conn.execute(
-                self.table_bot_users
-                .insert()
-                .values(
-                    **values
-                )
-            )
+            conn.execute(self.table_bot_users.insert().values(**values))
 
     def get_all_users_from_db(self) -> List[UserModel]:
         """
         Выдает все записи из БД
         """
         with self.engine.connect() as conn:
-            users_raw: ResultProxy = conn.execute(
-                select(self.table_bot_users)
-            )
+            users_raw: ResultProxy = conn.execute(select(self.table_bot_users))
             return self.__to_dict(users_raw)
 
     def user_all_qty_in_db(self) -> Callable[[], int]:
@@ -83,23 +71,20 @@ class DataBase:
         Считает количество записей в БД
         """
         with self.engine.connect() as conn:
-            user_raw: ResultProxy = conn.execute(
-                select(self.table_bot_users)
-            )
+            user_raw: ResultProxy = conn.execute(select(self.table_bot_users))
             return user_raw.rowcount
 
     def hdd_get_koren_or_path(self, user_id: int, is_koren: bool = False, is_path: bool = False) -> str:
 
         with self.engine.connect() as conn:
             hdd_raw: ResultProxy = conn.execute(
-                select(self.table_admin_hdd_roots)
-                .where(self.table_admin_hdd_roots.c.user_id == user_id)
+                select(self.table_admin_hdd_roots).where(self.table_admin_hdd_roots.c.user_id == user_id)
             )
             hdd = self.__to_dict(hdd_raw, one=True)
             if is_path:
-                res = hdd.get('path')
+                res = hdd.get("path")
             elif is_koren:
-                res = hdd.get('coren')
+                res = hdd.get("coren")
             else:
                 raise TypeError
 
@@ -111,8 +96,7 @@ class DataBase:
         """
         with self.engine.connect() as conn:
             conn.execute(
-                self.table_admin_hdd_roots
-                .update()
+                self.table_admin_hdd_roots.update()
                 .where(self.table_admin_hdd_roots.c.user_id == user_id)
                 .values(**values)
             )
