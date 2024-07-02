@@ -42,7 +42,12 @@ async def start(message: Message) -> None:
 
     await ExcelFileDownload.get_file.set()
 
-    msg = await bot.send_message(chat_id=message.chat.id, text='Пришли файл в формате ".xlsx"')
+    msg = await bot.send_message(
+        chat_id=message.chat.id,
+        text='Пришли файл в формате ".xlsx"\n'
+             '1.Между "шапкой" и первой строкой с датой не должно быть пустых строк\n'
+             '2.Дата должна быть заполнена в коротком виде: 01.01.2024'
+    )
 
     logger.info('Бот отправил сообщение "{}"'.format(msg.text), user_id=message.chat.id)
 
@@ -149,7 +154,7 @@ async def upload_excel_file_func(message: Message, state: FSMContext) -> None:
 
 @dp.callback_query_handler(
     lambda call: (call.data == "yes_overwrite_excel" or call.data == "no_leave_excel")
-    and "Excel уже есть. Перезаписать?" in call.message.text,
+                 and "Excel уже есть. Перезаписать?" in call.message.text,
     state=ExcelFileDownload.change_file,
 )
 async def overwrite_excel_func(call: CallbackQuery, state: FSMContext) -> None:
