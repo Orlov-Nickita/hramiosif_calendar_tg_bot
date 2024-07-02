@@ -13,10 +13,8 @@ async def send_qrcode(message: Message) -> None:
     :param message: Сообщение от пользователя.
     :return: Файл с qr-кодоом.
     """
-    logger.info('Запущена функция send_qrcode',
-                username=message.chat.username,
-                user_id=message.chat.id)
-    
+    logger.info("Запущена функция send_qrcode", username=message.chat.username, user_id=message.chat.id)
+
     await bot.send_chat_action(chat_id=message.chat.id, action=ChatActions.UPLOAD_DOCUMENT)
 
     msg = """
@@ -44,6 +42,6 @@ async def send_qrcode(message: Message) -> None:
     """
 
     await bot.send_message(chat_id=message.chat.id, text=msg, parse_mode=ParseMode.HTML)
-    await bot.send_photo(chat_id=message.chat.id, photo=open(qr_code_dir + qr_code, 'rb'))
+    await bot.send_photo(chat_id=message.chat.id, photo=open(qr_code_dir + qr_code, "rb"))
 
-    logger.info('Бот отправил информацию о пожертвованиях', user_id=message.chat.id)
+    logger.info("Бот отправил информацию о пожертвованиях", user_id=message.chat.id)
