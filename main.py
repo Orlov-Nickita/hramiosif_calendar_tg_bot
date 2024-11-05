@@ -10,6 +10,7 @@ from loader import log_dir, schedules_main_dir, users_sql_dir
 from utils.logger import log_main
 from message_handlers import *
 
+
 async def on_startup(dispatcher, url=None, cert=None):
     commands = [
         BotCommand(command="/start", description="Начать"),
