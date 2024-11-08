@@ -13,5 +13,21 @@ services:
       - /home/orlow/hram:/app/hdd
     networks:
       - my_network
+
+  database:
+    container_name: postgres
+    image: postgres:14.5-alpine
+    restart: always
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres:/var/lib/postgres/data
+    env_file:
+      - /home/orlow/postgres/.env
+    networks:
+      - my_network  
+
+volumes:
+  postgres:
 networks:
   my_network:  
