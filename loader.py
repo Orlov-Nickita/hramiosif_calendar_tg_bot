@@ -6,6 +6,7 @@ import os
 from dotenv import load_dotenv
 from bot.init_bot import init_bot
 
+
 load_dotenv()
 
 PG_USER = os.getenv("PG_USER")
