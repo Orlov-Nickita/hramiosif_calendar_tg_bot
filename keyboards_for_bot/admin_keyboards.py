@@ -44,7 +44,7 @@ def IKM_admin_panel_short() -> InlineKeyboardMarkup:
         callback_data="admin_manual_download",
     )
 
-    ikm_admin_panel_short.add(btn1, btn2, btn3, btn4, btn5, btn6)
+    ikm_admin_panel_short.add(btn1, btn2, btn4, btn5, btn6)
 
     return ikm_admin_panel_short
 
@@ -112,7 +112,7 @@ def IKM_admin_panel_main() -> InlineKeyboardMarkup:
         callback_data="admin_manual_download",
     )
 
-    ikm_admin_panel_main.add(btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9, btn10, btn11)
+    ikm_admin_panel_main.add(btn1, btn2, btn4, btn5, btn6, btn7, btn8, btn9, btn10, btn11)
 
     return ikm_admin_panel_main
 

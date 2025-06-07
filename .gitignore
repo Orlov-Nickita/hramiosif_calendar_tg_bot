@@ -137,3 +137,6 @@ dmypy.json
 /christian_calendar/
 /commands/admin_get_questions_from_bot.py
 /commands/t_question.py
+
+dev
+/venv310/

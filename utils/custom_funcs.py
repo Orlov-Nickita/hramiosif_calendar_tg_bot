@@ -27,6 +27,18 @@ from loader import (
     json_saints,
 )
 from aiogram.types import CallbackQuery, Message, InlineKeyboardMarkup
+import pdfplumber
+import pandas as pd
+from loader import week_days
+
+
+def delete_week_days(value: str):
+    if value:
+        v = value.lower()
+        for day in week_days:
+            v = v.replace(day.lower(), '').replace('\n', '')
+        return v
+    return value
 
 
 def button_text(button_call: CallbackQuery):
@@ -71,17 +83,18 @@ def button_text(button_call: CallbackQuery):
 
 
 async def load_photo_or_doc_from_bot(
-    bot,
-    logger,
-    msg: Message,
-    src: str,
-    downloaded_file: bytes,
-    bot_text: str,
-    keyboard: InlineKeyboardMarkup = None,
-    photo: bool = False,
-    doc: bool = False,
-    other_week: bool = False,
-    state: FSMContext = None,
+        bot,
+        logger,
+        msg: Message,
+        src: str,
+        downloaded_file: bytes,
+        bot_text: str,
+        make_excel_file: bool = False,
+        keyboard: InlineKeyboardMarkup = None,
+        photo: bool = False,
+        doc: bool = False,
+        other_week: bool = False,
+        state: FSMContext = None,
 ):
     """
     Функция сохранения файла. Фото или файл. Если присылается файл Excel, то программа проверяет отличие от
@@ -100,6 +113,18 @@ async def load_photo_or_doc_from_bot(
     try:
         with open(src, "wb") as new_file:
             new_file.write(downloaded_file)
+
+        if src.endswith('.pdf') and make_excel_file:
+            all_tables = []
+            with pdfplumber.open(src) as pdf:
+                for page in pdf.pages:
+                    table = page.extract_table()
+                    if table:
+                        all_tables.extend(table)
+
+            df = pd.DataFrame(all_tables, columns=['Дата', 'День памяти святого', 'Время богослужений'])
+            df['Дата'] = df.apply(lambda row: delete_week_days(row['Дата']), axis=1)
+            df.to_excel(schedules_excel_dir + excel_file_name, index=False)
 
     except FileNotFoundError:
         logger.error("Файл для перезаписи не найден!")
@@ -124,9 +149,9 @@ async def load_photo_or_doc_from_bot(
             if not os.path.exists(schedules_excel_dir + json_excel_file):
                 data_to_json(json_file=schedules_excel_dir + json_excel_file, data_dict_or_list={})
             if not await check_new_file(
-                new_file=schedules_excel_dir + excel_file_name,
-                filejson=schedules_excel_dir + json_excel_file,
-                message=msg,
+                    new_file=schedules_excel_dir + excel_file_name,
+                    filejson=schedules_excel_dir + json_excel_file,
+                    message=msg,
             ):
                 opened_xl = await open_to_dict(excel_file=schedules_excel_dir + excel_file_name, message=msg)
                 data_to_json(json_file=schedules_excel_dir + json_excel_file, data_dict_or_list=opened_xl)
@@ -148,9 +173,9 @@ async def load_photo_or_doc_from_bot(
                 data_to_json(json_file=schedules_excel_dir + json_timing, data_dict_or_list=list_of_col[2])
 
                 if await check_new_file(
-                    new_file=schedules_excel_dir + excel_file_name,
-                    filejson=schedules_excel_dir + json_excel_file,
-                    message=msg,
+                        new_file=schedules_excel_dir + excel_file_name,
+                        filejson=schedules_excel_dir + json_excel_file,
+                        message=msg,
                 ):
                     msg_func = await bot.send_message(chat_id=msg.chat.id, text=bot_text)
                 else:
@@ -163,8 +188,8 @@ async def load_photo_or_doc_from_bot(
                 msg_func = await bot.send_message(
                     chat_id=msg.chat.id,
                     text="Файл точно такой же, как и у меня. Чтобы перезаписать данные, "
-                    "нужно чтобы файл содержал хоть сколько-нибудь отличную "
-                    "информацию от текущей",
+                         "нужно чтобы файл содержал хоть сколько-нибудь отличную "
+                         "информацию от текущей",
                 )
                 await state.finish()
 

@@ -66,8 +66,6 @@ async def open_to_dict(excel_file: str, message: Message) -> dict:
             ),
         )
 
-        exit()
-
     else:
         return data_from_excel.to_dict()
 

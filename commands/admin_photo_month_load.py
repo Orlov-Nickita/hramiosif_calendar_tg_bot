@@ -144,9 +144,11 @@ async def save_photo_month(call: CallbackQuery, state: FSMContext) -> None:
     if call.data == "this_month" or call.data == "next_month":
         if call.data == "this_month":
             month_digit = int(datetime.datetime.now(pytz.timezone("Europe/Moscow")).strftime("%m"))
+            make_excel_file: bool = True
 
         else:
             month_digit = int(datetime.datetime.now(pytz.timezone("Europe/Moscow")).strftime("%m")) + 1
+            make_excel_file: bool = False
 
         current_month = all_months_in_calendar_for_save[month_digit - 1]
         year_digit = int(datetime.datetime.now(pytz.timezone("Europe/Moscow")).strftime("%Y"))
@@ -191,7 +193,9 @@ async def save_photo_month(call: CallbackQuery, state: FSMContext) -> None:
                     logger=logger,
                     msg=call.message,
                     src=src,
+                    doc=True,
                     downloaded_file=downloaded_file,
+                    make_excel_file=make_excel_file,
                     bot_text="Расписание на месяц загружено",
                     keyboard=IKM_admin_save_photo_again(),
                     state=state,
@@ -302,12 +306,21 @@ async def overwrite_month(call: CallbackQuery, state: FSMContext) -> None:
         src = data["src"]
 
     if call.data == "yes_overwrite":
+        month_digit = int(datetime.datetime.now(pytz.timezone("Europe/Moscow")).strftime("%m"))
+        current_month = all_months_in_calendar_for_save[month_digit - 1].lower()
+
+        if current_month in src.lower():
+            make_excel_file = True
+        else:
+            make_excel_file = False
 
         await load_photo_or_doc_from_bot(
             bot=bot,
             logger=logger,
             msg=call.message,
             src=src,
+            doc=True,
+            make_excel_file=make_excel_file,
             downloaded_file=downloaded_file,
             bot_text="Файл перезаписан, расписание на месяц загружено",
             keyboard=IKM_admin_save_photo_again(),
