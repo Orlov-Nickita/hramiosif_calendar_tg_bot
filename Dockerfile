@@ -1,4 +1,4 @@
-FROM python:3.10
+FROM python:3.10.5
 
 LABEL maintainer="Nikita Orlov <orlov.nickita@gmail.com>"
 
